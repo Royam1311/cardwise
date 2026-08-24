@@ -1,0 +1,35 @@
+import React,{useEffect,useMemo,useState} from 'react';
+import {Search,CreditCard,LogOut,Plus,Trash2,ShieldCheck,Sparkles,User,Tag} from 'lucide-react';
+import {supabase,configured} from './supabase';
+
+const CARD_TYPES=[['visa','Visa רגיל'],['tav','תו הזהב'],['htz','הייטקזון'],['max','MAX'],['isracard','ישראכרט'],['haver','חבר'],['behatsdaa','בהצדעה']];
+const DEMO=[
+ {id:'d1',product_name:'Apple AirPods Pro 2 USB-C',sku:'MTJV3ZM/A',category:'אוזניות',offers:[['KSP',999,0,'htz','12% הנחה'],['Ivory',1049,0,'visa','₪30 החזר'],['BUG',1149,0,'htz','20% הנחה']]},
+ {id:'d2',product_name:'Ninja Woodfire OO101',sku:'OO101',category:'מטבח וגינה',offers:[['שקם אלקטריק',1690,0,'htz','18% הנחה'],['LastPrice',1599,39,'visa','₪50 החזר'],['ACE',1790,0,'tav','20% הנחה']]},
+ {id:'d3',product_name:'Sony PlayStation 5 Slim',sku:'CFI-2016A',category:'גיימינג',offers:[['KSP',2199,0,'htz','10% הנחה'],['Ivory',2149,0,null,'ללא הטבה'],['BUG',2299,0,'tav','12% הנחה']]}
+];
+const money=n=>new Intl.NumberFormat('he-IL',{style:'currency',currency:'ILS',maximumFractionDigits:0}).format(n);
+function effective(price,card,note){if(!card)return price; const pct=Number(note?.match(/(\d+)%/)?.[1]||0); const cash=Number(note?.match(/₪(\d+)/)?.[1]||0); return Math.max(0,price*(1-pct/100)-cash)}
+
+function Auth({onDemo}){
+ const [mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);
+ async function submit(e){e.preventDefault();setMsg('');if(!configured){setMsg('חסרים משתני חיבור ל-Supabase. אפשר להיכנס להדגמה.');return}setBusy(true);const action=mode==='login'?supabase.auth.signInWithPassword({email,password}):supabase.auth.signUp({email,password});const {error}=await action;setBusy(false);setMsg(error?error.message:(mode==='login'?'התחברת בהצלחה':'נשלח אליך אימייל לאישור, אם אישור אימייל מופעל.'))}
+ return <main className="auth"><section className="brand-panel"><div className="logo"><CreditCard/> CardWise</div><h1>המחיר שמתאים דווקא לך</h1><p>השוואת מחירים, משלוחים והטבות לפי הכרטיסים והמועדונים שלך.</p><div className="feature"><ShieldCheck/> אין צורך להזין מספר כרטיס או CVV</div></section><section className="auth-card"><h2>{mode==='login'?'כניסה לחשבון':'יצירת חשבון'}</h2><p className="muted">גרסת MVP ראשונית</p><form onSubmit={submit}><label>אימייל<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>סיסמה<input type="password" minLength="6" value={password} onChange={e=>setPassword(e.target.value)} required/></label><button className="primary" disabled={busy}>{busy?'טוען...':mode==='login'?'כניסה':'הרשמה'}</button></form>{msg&&<div className="notice">{msg}</div>}<button className="link" onClick={()=>setMode(mode==='login'?'register':'login')}>{mode==='login'?'אין לך חשבון? הרשמה':'כבר נרשמת? כניסה'}</button><button className="demo" onClick={onDemo}>כניסה לגרסת הדגמה</button></section></main>
+}
+
+function App(){
+ const [session,setSession]=useState(null),[demo,setDemo]=useState(false),[cards,setCards]=useState([]),[query,setQuery]=useState(''),[tab,setTab]=useState('search'),[loading,setLoading]=useState(true);
+ useEffect(()=>{if(!configured){setLoading(false);return}supabase.auth.getSession().then(({data})=>{setSession(data.session);setLoading(false)});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>setSession(s));return()=>subscription.unsubscribe()},[]);
+ useEffect(()=>{if(session)loadCards();else if(demo)setCards(['visa','tav','htz'])},[session,demo]);
+ async function loadCards(){const {data}=await supabase.from('cards').select('card_type').order('created_at');setCards((data||[]).map(x=>x.card_type))}
+ async function toggleCard(code){if(demo){setCards(x=>x.includes(code)?x.filter(c=>c!==code):[...x,code]);return}if(cards.includes(code)){await supabase.from('cards').delete().eq('user_id',session.user.id).eq('card_type',code)}else{await supabase.from('cards').insert({user_id:session.user.id,card_type:code,card_name:CARD_TYPES.find(x=>x[0]===code)[1]})}loadCards()}
+ const product=useMemo(()=>{const q=query.trim().toLowerCase();return DEMO.find(p=>(p.product_name+' '+p.sku+' '+p.category).toLowerCase().includes(q))||DEMO[0]},[query]);
+ const offers=useMemo(()=>product.offers.map(([store,price,shipping,card,note])=>{const eligible=card&&cards.includes(card),final=eligible?effective(price,card,note):price;return{store,price,shipping,card:eligible?card:null,note:eligible?note:'ללא הטבה זמינה',total:final+shipping,final}}).sort((a,b)=>a.total-b.total),[product,cards]);
+ if(loading)return <div className="center">טוען...</div>;if(!session&&!demo)return <Auth onDemo={()=>setDemo(true)}/>;
+ const email=session?.user?.email||'משתמש הדגמה';
+ return <div dir="rtl"><header><div className="logo dark"><CreditCard/> CardWise</div><nav><button className={tab==='search'?'active':''} onClick={()=>setTab('search')}><Search/> חיפוש</button><button className={tab==='cards'?'active':''} onClick={()=>setTab('cards')}><CreditCard/> הכרטיסים שלי</button></nav><div className="user"><User/>{email}<button title="יציאה" onClick={()=>session?supabase.auth.signOut():setDemo(false)}><LogOut/></button></div></header>
+ {demo&&<div className="demo-banner">מצב הדגמה: הנתונים אינם מחירים או הטבות אמיתיים.</div>}
+ {tab==='cards'?<section className="page"><div className="page-title"><div><h1>הכרטיסים והמועדונים שלי</h1><p>בחר רק את סוגי הכרטיסים. אין להזין מספר כרטיס מלא.</p></div><CreditCard/></div><div className="card-grid">{CARD_TYPES.map(([code,name])=><button key={code} onClick={()=>toggleCard(code)} className={'credit-card '+(cards.includes(code)?'selected':'')}><span>{name}</span><small>{cards.includes(code)?'נוסף לחשבון':'לחץ להוספה'}</small>{cards.includes(code)?<Trash2/>:<Plus/>}</button>)}</div></section>:<><section className="hero"><span><Sparkles/> השוואת המחיר האישי שלך</span><h1>מוצאים את העסקה שבאמת<br/>הכי משתלמת עבורך</h1><form onSubmit={e=>e.preventDefault()}><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="לדוגמה: AirPods, OO101 או PS5"/><button className="primary">השווה מחירים</button></form></section><section className="page results"><aside><div className="product-icon">{product.category==='אוזניות'?'🎧':product.category==='גיימינג'?'🎮':'🔥'}</div><span className="category">{product.category}</span><h2>{product.product_name}</h2><p>מק״ט: {product.sku}</p><div className="summary"><Tag/> הכרטיסים הפעילים: {cards.length}</div></aside><main><h2>המחירים שלך אחרי ההטבות</h2>{offers.map((o,i)=><article className={i===0?'best':''} key={o.store}>{i===0&&<b className="best-label">העסקה המשתלמת ביותר עבורך</b>}<div><h3>{o.store}</h3><small><ShieldCheck/> חנות לדוגמה</small></div><div><del>{money(o.price)}</del><strong>{money(o.final)}</strong><span>{o.note}</span><p>משלוח: {o.shipping?money(o.shipping):'חינם'} | סה״כ: <b>{money(o.total)}</b></p></div><button>לרכישה</button></article>)}<div className="warning">נתוני המוצרים, המחירים וההטבות בגרסה זו הם נתוני הדגמה בלבד.</div></main></section></>}
+ </div>
+}
+export default App;
