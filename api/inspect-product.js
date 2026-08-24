@@ -17,12 +17,17 @@ export default async function handler(req, res) {
 
     const html = await response.text();
 
+    const priceMatches = html.match(/price|Price|PRICE/gi) || [];
+
     return res.status(200).json({
       ok: response.ok,
       httpStatus: response.status,
-      finalUrl: response.url,
       htmlBytes: html.length,
-      preview: html.substring(0, 1000)
+      priceOccurrences: priceMatches.length,
+      containsProduct: html.includes('Product'),
+      containsJsonLd: html.includes('application/ld+json'),
+      containsOffer: html.includes('Offer'),
+      containsPriceWord: html.includes('price')
     });
 
   } catch (err) {
@@ -32,3 +37,4 @@ export default async function handler(req, res) {
     });
   }
 }
+`
