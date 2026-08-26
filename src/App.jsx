@@ -41,7 +41,7 @@ function Auth({ onDemo }) {
   return (
     <main className="auth">
       <section className="brand-panel">
-        <div className="logo"><CreditCard /> CardWise</div>
+        <div className="logo"><CreditCard /> BENEFY</div>
         <h1>המחיר שמתאים דווקא לך</h1>
         <p>השוואת מחירים, משלוחים והטבות לפי הכרטיסים והמועדונים שלך.</p>
         <div className="feature"><ShieldCheck /> אין צורך להזין מספר כרטיס או CVV</div>
@@ -129,7 +129,7 @@ function Admin() {
   const SectionIcon = config[section].icon;
   return (
     <section className="page admin">
-      <div className="page-title"><div><h1>פאנל ניהול</h1><p>ניהול הנתונים של CardWise.</p></div><Settings /></div>
+      <div className="page-title"><div><h1>פאנל ניהול</h1><p>ניהול הנתונים של BENEFY.</p></div><Settings /></div>
       <div className="admin-tabs">
         {Object.entries(config).map(([key, value]) => { const Icon = value.icon; return <button key={key} className={section === key ? 'active' : ''} onClick={() => setSection(key)}><Icon />{value.title}</button>; })}
       </div>
@@ -188,10 +188,10 @@ export default function App() {
 
   async function loadUser() {
     const [{ data: cardData }, { data: profileData }] = await Promise.all([
-      supabase.from('cards').select('card_type').order('created_at'),
+      supabase.from('cards').select('card_code,card_type').eq('active', true).order('created_at'),
       supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
     ]);
-    setCards((cardData || []).map(x => x.card_type));
+    setCards((cardData || []).map(x => x.card_code || x.card_type).filter(Boolean));
     setIsAdmin(profileData?.role === 'admin');
   }
 
@@ -202,8 +202,18 @@ export default function App() {
 
   async function toggleCard(code) {
     if (demo) { setCards(current => current.includes(code) ? current.filter(x => x !== code) : [...current, code]); return; }
-    if (cards.includes(code)) await supabase.from('cards').delete().eq('user_id', session.user.id).eq('card_type', code);
-    else await supabase.from('cards').insert({ user_id: session.user.id, card_type: code, card_name: cardCatalog.find(x => x[0] === code)?.[1] || code });
+    if (cards.includes(code)) {
+      await supabase.from('cards').delete().eq('user_id', session.user.id).eq('card_code', code);
+    } else {
+      const program = cardCatalog.find(x => x[0] === code);
+      await supabase.from('cards').insert({
+        user_id: session.user.id,
+        card_code: code,
+        card_type: code,
+        card_name: program?.[1] || code,
+        active: true
+      });
+    }
     loadUser();
   }
 
@@ -245,19 +255,70 @@ export default function App() {
       storeRows = data || [];
     }
 
+    let benefitRows = [];
+    if (storeIds.length && cards.length) {
+      const { data, error } = await supabase
+        .from('benefit_rules')
+        .select('id,program_code,store_id,benefit_type,discount_value,discount_unit,max_discount_cap,min_purchase,stackable,notes,active,last_verified,title,description,start_date,end_date,source_url,coupon_code,registration_required,loaded_card_required,online_only,new_customers_only,terms')
+        .in('program_code', cards)
+        .in('store_id', storeIds)
+        .eq('active', true);
+      if (error) setSearchError(`המחירים נטענו, אך ההטבות לא נטענו: ${error.message}`);
+      benefitRows = data || [];
+    }
+
+    const now = Date.now();
+    const isActiveRule = rule => {
+      const startsOk = !rule.start_date || new Date(rule.start_date).getTime() <= now;
+      const endsOk = !rule.end_date || new Date(rule.end_date).getTime() >= now;
+      return startsOk && endsOk;
+    };
+    const calculateRule = (price, rule) => {
+      const value = Number(rule.discount_value || 0);
+      const minimum = Number(rule.min_purchase || 0);
+      if (!value || price < minimum) return null;
+      if (rule.benefit_type === 'special_price') {
+        const saving = Math.max(0, price - value);
+        return { saving, checkoutPrice: value, effectivePrice: value };
+      }
+      let saving = rule.discount_unit === 'percent' ? price * value / 100 : value;
+      const cap = Number(rule.max_discount_cap || 0);
+      if (cap > 0) saving = Math.min(saving, cap);
+      saving = Math.max(0, Math.min(saving, price));
+      const deferred = ['cashback', 'loaded_card', 'voucher'].includes(rule.benefit_type);
+      return {
+        saving,
+        checkoutPrice: deferred ? price : price - saving,
+        effectivePrice: price - saving
+      };
+    };
+
     const combined = (priceRows || []).map(row => {
       const store = storeRows.find(x => x.id === row.store_id);
       const shipping = Number(row.shipping || 0);
       const price = Number(row.price || 0);
+      const candidates = benefitRows
+        .filter(rule => rule.store_id === row.store_id && isActiveRule(rule))
+        .map(rule => ({ rule, calculation: calculateRule(price, rule) }))
+        .filter(item => item.calculation)
+        .sort((a, b) => a.calculation.effectivePrice - b.calculation.effectivePrice);
+      const best = candidates[0] || null;
+      const checkoutPrice = best ? best.calculation.checkoutPrice : price;
+      const effectivePrice = best ? best.calculation.effectivePrice : price;
+      const programName = best ? (cardCatalog.find(x => x[0] === best.rule.program_code)?.[1] || best.rule.program_code) : null;
       return {
         id: row.id,
         store: store?.store_name || 'חנות',
         website: store?.website || null,
         price,
         shipping,
-        final: price,
-        total: price + shipping,
-        note: 'מחיר בסיס, ללא הטבה פעילה',
+        final: checkoutPrice,
+        effective: effectivePrice,
+        total: effectivePrice + shipping,
+        saving: best?.calculation.saving || 0,
+        benefit: best?.rule || null,
+        programName,
+        note: best ? `${programName}: ${best.rule.title || 'הטבה פעילה'}` : 'מחיר בסיס, ללא הטבה פעילה',
         updatedAt: row.updated_at
       };
     }).sort((a, b) => a.total - b.total);
@@ -273,7 +334,7 @@ export default function App() {
 
   return <div dir="rtl">
     <header>
-      <div className="logo dark"><CreditCard />CardWise</div>
+      <div className="logo dark"><CreditCard />BENEFY</div>
       <nav>
         <button className={tab === 'search' ? 'active' : ''} onClick={() => setTab('search')}><Search />חיפוש</button>
         <button className={tab === 'cards' ? 'active' : ''} onClick={() => setTab('cards')}><CreditCard />הכרטיסים שלי</button>
@@ -316,7 +377,14 @@ export default function App() {
               {offers.map((offer, index) => <article className={index === 0 ? 'best' : ''} key={offer.id}>
                 {index === 0 && <b className="best-label">המחיר הנמוך ביותר שנמצא</b>}
                 <div><h3>{offer.store}</h3><small><ShieldCheck />מקור מחיר במסד הנתונים</small></div>
-                <div><strong>{money(offer.final)}</strong><span>{offer.note}</span><p>משלוח: {offer.shipping ? money(offer.shipping) : 'חינם'} | סה״כ: <b>{money(offer.total)}</b></p></div>
+                <div>
+                  {offer.saving > 0 && <del>{money(offer.price)}</del>}
+                  <strong>{money(offer.effective)}</strong>
+                  <span>{offer.note}</span>
+                  {offer.saving > 0 && <p className="saving-line">חיסכון: <b>{money(offer.saving)}</b>{offer.final !== offer.effective ? ` | מחיר בקופה: ${money(offer.final)}` : ''}</p>}
+                  {offer.benefit?.notes?.includes('TEST') && <p className="test-label">הטבת בדיקה בלבד, אינה הצעה מסחרית מאומתת</p>}
+                  <p>משלוח: {offer.shipping ? money(offer.shipping) : 'חינם'} | סה״כ אפקטיבי: <b>{money(offer.total)}</b></p>
+                </div>
                 {offer.website ? <button onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>לחנות</button> : <button disabled>אין קישור</button>}
               </article>)}
             </main>
