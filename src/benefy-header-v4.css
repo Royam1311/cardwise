@@ -1,0 +1,393 @@
+/* BENEFY compact pill header v4
+   Full replacement for benefy-header-v3.css.
+   Visual-only header redesign. */
+
+.topbar,
+.topbar.is-compact {
+  direction: ltr;
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) auto minmax(190px, 1fr);
+  align-items: center;
+  column-gap: 14px;
+  width: min(1180px, calc(100% - 56px));
+  min-height: 68px;
+  margin-top: 14px;
+  padding: 5px 8px 5px 14px;
+  border-radius: 999px;
+  overflow: visible;
+}
+
+/* Physical left side: profile, theme and language */
+.topbar > .header-actions {
+  direction: rtl;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Physical center: search, wallet and admin */
+.topbar > .nav-3d {
+  direction: rtl;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  margin: 0;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.nav-3d button {
+  min-height: 44px;
+  padding: 7px 17px;
+  border-radius: 999px;
+}
+
+/* Physical right edge: logo */
+.topbar > .site-logo {
+  direction: ltr;
+  grid-column: 3;
+  grid-row: 1;
+  position: relative;
+  justify-self: end;
+  width: 224px;
+  height: 64px;
+  margin-right: -14px;
+  overflow: visible;
+}
+
+.topbar > .site-logo .site-logo__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+  transform: scale(1.3);
+  transform-origin: right center;
+  transition: opacity .25s ease, visibility .25s ease, transform .25s ease, filter .25s ease;
+}
+
+.topbar > .site-logo:hover .site-logo__image {
+  transform: scale(1.34);
+}
+
+/* Clean standalone controls, no permanent boxes */
+.header-control {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 0 !important;
+  border-radius: 999px;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.header-control:hover,
+.header-control:focus-visible {
+  color: var(--benefy-blue-deep);
+  background: var(--benefy-blue-wash) !important;
+  outline: none;
+}
+
+.theme-control {
+  width: 42px;
+  padding: 0;
+}
+
+/* Profile icon */
+.profile-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-menu__trigger {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: var(--benefy-muted);
+  background: transparent;
+  transition: color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.profile-menu__trigger:hover,
+.profile-menu__trigger:focus-visible,
+.profile-menu.is-open .profile-menu__trigger {
+  color: var(--benefy-blue-deep);
+  background: var(--benefy-blue-wash);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.profile-menu__trigger svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Exactly two visible options: email and logout */
+.profile-menu__popover {
+  direction: rtl;
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: min(320px, calc(100vw - 28px));
+  padding: 8px;
+  border: 1px solid var(--benefy-border);
+  border-radius: 22px;
+  color: var(--benefy-text);
+  background: color-mix(in srgb, var(--benefy-panel) 95%, transparent);
+  box-shadow: 0 22px 65px var(--benefy-shadow);
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  z-index: 100;
+  animation: profileMenuIn .18s ease both;
+}
+
+.profile-menu__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--benefy-text);
+  background: transparent;
+  text-align: start;
+}
+
+.profile-menu__option + .profile-menu__option {
+  margin-top: 4px;
+}
+
+.profile-menu__option-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 999px;
+  color: var(--benefy-blue-deep);
+  background: var(--benefy-blue-wash);
+}
+
+.profile-menu__option-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.profile-menu__email {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-menu__logout {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.profile-menu__logout:hover,
+.profile-menu__logout:focus-visible {
+  color: #a33b3b;
+  background: rgba(226, 87, 87, .10);
+  outline: none;
+}
+
+.profile-menu__logout:hover .profile-menu__option-icon,
+.profile-menu__logout:focus-visible .profile-menu__option-icon {
+  color: #a33b3b;
+  background: rgba(226, 87, 87, .10);
+}
+
+/* Scroll state: shorter and narrower pill */
+.topbar.is-compact {
+  grid-template-columns: minmax(120px, 1fr) auto minmax(84px, 1fr);
+  width: min(790px, calc(100% - 34px));
+  min-height: 58px;
+  padding: 4px 7px 4px 10px;
+  border-radius: 999px;
+  column-gap: 8px;
+}
+
+.topbar.is-compact > .site-logo {
+  width: 90px;
+  height: 46px;
+  margin-right: -10px;
+}
+
+.topbar.is-compact > .site-logo .site-logo__image {
+  transform: scale(1.22);
+}
+
+.topbar.is-compact .nav-3d button {
+  min-height: 40px;
+  padding-inline: 12px;
+}
+
+.topbar.is-compact .header-control span {
+  display: none;
+}
+
+/* Rounded product UI */
+.auth-card,
+.welcome-card,
+.product-card,
+.offer-card,
+.wallet-counter,
+.admin-cards article,
+.wallet-card {
+  border-radius: 28px;
+}
+
+.hero-premium form {
+  border-radius: 999px;
+}
+
+.primary,
+.secondary,
+.search-3d,
+.store-button,
+.google-login-button,
+.demo,
+.summary,
+.price-block > span {
+  border-radius: 999px;
+}
+
+@keyframes profileMenuIn {
+  from { opacity: 0; transform: translateY(-5px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 1050px) {
+  .topbar,
+  .topbar.is-compact {
+    width: calc(100% - 28px);
+    grid-template-columns: minmax(145px, 1fr) auto minmax(150px, 1fr);
+  }
+
+  .topbar > .site-logo {
+    width: 174px;
+    height: 58px;
+  }
+
+  .nav-3d button {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .topbar.is-compact {
+    direction: ltr;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "logo actions"
+      "navigation navigation";
+    width: calc(100% - 18px);
+    min-height: auto;
+    padding: 8px 10px;
+    row-gap: 7px;
+    border-radius: 28px;
+  }
+
+  .topbar > .site-logo,
+  .topbar.is-compact > .site-logo {
+    grid-area: logo;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: start;
+    width: 152px;
+    height: 50px;
+    margin: 0 0 0 -8px;
+  }
+
+  .topbar > .site-logo .site-logo__image,
+  .topbar.is-compact > .site-logo .site-logo__image {
+    object-position: left center;
+    transform: scale(1.18);
+    transform-origin: left center;
+  }
+
+  .topbar > .header-actions,
+  .topbar.is-compact > .header-actions {
+    grid-area: actions;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: end;
+  }
+
+  .topbar > .nav-3d,
+  .topbar.is-compact > .nav-3d {
+    grid-area: navigation;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: center;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .profile-menu__popover {
+    left: 0;
+    right: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar,
+  .topbar.is-compact {
+    grid-template-columns: 1fr;
+    grid-template-areas: "logo" "actions" "navigation";
+  }
+
+  .topbar > .site-logo,
+  .topbar.is-compact > .site-logo,
+  .topbar > .header-actions,
+  .topbar.is-compact > .header-actions,
+  .topbar > .nav-3d,
+  .topbar.is-compact > .nav-3d {
+    justify-self: center;
+  }
+
+  .topbar > .site-logo,
+  .topbar.is-compact > .site-logo {
+    margin: 0;
+  }
+
+  .topbar > .site-logo .site-logo__image,
+  .topbar.is-compact > .site-logo .site-logo__image {
+    object-position: center;
+    transform-origin: center;
+  }
+
+  .profile-menu__popover {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-menu__popover,
+  .profile-menu__trigger {
+    animation: none;
+    transition: none;
+  }
+}
+
+.profile-menu__email-option {
+  cursor: default;
+}
