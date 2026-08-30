@@ -5,11 +5,20 @@ import './styles.css';
 import './benefy-luxury.css';
 import './benefy-blue-theme.css';
 import './benefy-typography.css';
-import './benefy-logo-fit.css';
+import './benefy-header-v3.css';
 import { enableCompactHeader } from './compactHeader';
+import { enableProfilePopover } from './profileEnhancer';
 
 function Root() {
-  useEffect(() => enableCompactHeader(), []);
+  useEffect(() => {
+    const disableCompactHeader = enableCompactHeader();
+    const disableProfilePopover = enableProfilePopover();
+    return () => {
+      disableCompactHeader?.();
+      disableProfilePopover?.();
+    };
+  }, []);
+
   return <App />;
 }
 
