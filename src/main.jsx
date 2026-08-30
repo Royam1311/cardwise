@@ -7,16 +7,20 @@ import './benefy-blue-theme.css';
 import './benefy-typography.css';
 import './benefy-header-v5.css';
 import './benefy-search-dark.css';
+import './benefy-header-tokens.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
+import { enableBenefyTokens } from './benefyTokens';
 
 function Root() {
   useEffect(() => {
     const disableCompactHeader = enableCompactHeader();
     const disableProfilePopover = enableProfilePopover();
+    const disableBenefyTokens = enableBenefyTokens();
     return () => {
       disableCompactHeader?.();
       disableProfilePopover?.();
+      disableBenefyTokens?.();
     };
   }, []);
 
