@@ -6,6 +6,7 @@ import './benefy-luxury.css';
 import './benefy-blue-theme.css';
 import './benefy-typography.css';
 import './benefy-header-v5.css';
+import './benefy-search-dark.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 
