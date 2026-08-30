@@ -1,114 +1,195 @@
-/* BENEFY header logo fit and alignment
+/* BENEFY header logo layout v2
+   Full replacement for the previous benefy-logo-fit.css.
    Visual-only override. No application logic changes. */
 
+/* Desktop layout:
+   left   = account, language and theme controls
+   center = search, wallet and admin navigation
+   right  = BENEFY logo
+*/
 .topbar {
-  position: sticky;
+  display: grid;
+  grid-template-columns: minmax(270px, 1fr) auto minmax(270px, 1fr);
+  grid-template-areas: "actions navigation logo";
+  align-items: center;
+  column-gap: 18px;
+  padding-inline: 18px;
 }
 
-/* Anchor the logo to the right edge of the floating header */
+.topbar > .header-actions {
+  grid-area: actions;
+  justify-self: start;
+  min-width: 0;
+}
+
+.topbar > .nav-3d {
+  grid-area: navigation;
+  justify-self: center;
+  margin-inline: auto;
+}
+
 .topbar > .site-logo {
-  position: absolute;
-  top: 50%;
-  right: 16px;
+  grid-area: logo;
+  position: relative;
+  top: auto;
+  right: auto;
   left: auto;
-  width: 168px;
-  height: 58px;
+  display: block;
+  justify-self: end;
+  width: 178px;
+  height: 62px;
   margin: 0;
-  transform: translateY(-50%);
+  flex: none;
   overflow: visible;
+  transform: none;
   z-index: 2;
 }
 
 .topbar > .site-logo .site-logo__image {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: right center;
-  transform: scale(1.22);
+  transform: scale(1.18);
   transform-origin: right center;
+  transition: opacity .25s ease, visibility .25s ease, transform .25s ease, filter .25s ease;
 }
 
 .topbar > .site-logo:hover .site-logo__image {
-  transform: scale(1.26);
+  transform: scale(1.22);
 }
 
-/* Compact floating header while scrolling */
+/* Compact header while scrolling */
+.topbar.is-compact {
+  grid-template-columns: minmax(120px, 1fr) auto minmax(72px, 1fr);
+  grid-template-areas: "actions navigation logo";
+  padding-inline: 10px;
+  column-gap: 10px;
+}
+
 .topbar.is-compact > .site-logo {
-  right: 10px;
-  width: 78px;
+  grid-area: logo;
+  justify-self: end;
+  width: 76px;
   height: 42px;
-  flex-basis: auto;
+  margin: 0;
+  flex: none;
 }
 
 .topbar.is-compact > .site-logo .site-logo__image {
   width: 100%;
   height: 100%;
-  transform: scale(1.18);
+  object-position: right center;
+  transform: scale(1.16);
   transform-origin: right center;
 }
 
 .topbar.is-compact > .site-logo:hover .site-logo__image {
-  transform: scale(1.22);
+  transform: scale(1.2);
 }
 
-/* Keep the navigation visually centered despite the absolute logo */
-.topbar > .nav-3d {
+.topbar.is-compact > .header-actions {
+  grid-area: actions;
+  justify-self: start;
+}
+
+.topbar.is-compact > .nav-3d {
+  grid-area: navigation;
   justify-self: center;
 }
 
-/* Avoid overlap between the right-side logo and header controls */
-@media (min-width: 901px) {
+/* Tablet */
+@media (max-width: 1100px) {
   .topbar {
-    padding-right: 194px;
+    grid-template-columns: minmax(210px, 1fr) auto minmax(170px, 1fr);
+    column-gap: 12px;
+    padding-inline: 14px;
+  }
+
+  .topbar > .site-logo {
+    width: 150px;
+    height: 56px;
   }
 
   .topbar.is-compact {
-    padding-right: 92px;
+    grid-template-columns: minmax(100px, 1fr) auto minmax(64px, 1fr);
   }
 }
 
-/* Tablet */
-@media (max-width: 900px) {
-  .topbar > .site-logo {
-    right: 13px;
-    width: 142px;
-    height: 52px;
+/* Mobile: logo gets its own centered row, controls and navigation remain usable */
+@media (max-width: 760px) {
+  .topbar,
+  .topbar.is-compact {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "logo actions"
+      "navigation navigation";
+    row-gap: 9px;
+    column-gap: 10px;
+    padding: 10px;
   }
 
-  .topbar.is-compact > .site-logo {
-    right: 9px;
-    width: 70px;
-    height: 40px;
-  }
-}
-
-/* Mobile header wraps, so keep the logo centered and fully visible */
-@media (max-width: 650px) {
   .topbar > .site-logo,
   .topbar.is-compact > .site-logo {
-    position: relative;
-    top: auto;
-    right: auto;
-    left: auto;
-    width: 150px;
-    height: 54px;
-    margin: 0 auto 4px;
+    grid-area: logo;
+    justify-self: start;
+    width: 138px;
+    height: 48px;
+    margin: 0;
     transform: none;
-    flex: 0 0 100%;
+  }
+
+  .topbar > .site-logo .site-logo__image,
+  .topbar.is-compact > .site-logo .site-logo__image {
+    object-position: left center;
+    transform: scale(1.14);
+    transform-origin: left center;
+  }
+
+  .topbar > .header-actions,
+  .topbar.is-compact > .header-actions {
+    grid-area: actions;
+    justify-self: end;
+    width: auto;
+  }
+
+  .topbar > .nav-3d,
+  .topbar.is-compact > .nav-3d {
+    grid-area: navigation;
+    justify-self: center;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar,
+  .topbar.is-compact {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "logo"
+      "actions"
+      "navigation";
+  }
+
+  .topbar > .site-logo,
+  .topbar.is-compact > .site-logo,
+  .topbar > .header-actions,
+  .topbar.is-compact > .header-actions,
+  .topbar > .nav-3d,
+  .topbar.is-compact > .nav-3d {
+    justify-self: center;
   }
 
   .topbar > .site-logo .site-logo__image,
   .topbar.is-compact > .site-logo .site-logo__image {
     object-position: center;
-    transform: scale(1.2);
     transform-origin: center;
-  }
-
-  .topbar > .site-logo:hover .site-logo__image,
-  .topbar.is-compact > .site-logo:hover .site-logo__image {
-    transform: scale(1.23);
   }
 }
 
