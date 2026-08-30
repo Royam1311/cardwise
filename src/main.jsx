@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles.css';
 import './benefy-luxury.css';
+import './benefy-blue-theme.css';
 import './benefy-typography.css';
 import { enableCompactHeader } from './compactHeader';
 
