@@ -1,0 +1,159 @@
+/* BENEFY search field dark-mode correction
+   Full visual override for the hero search bar only.
+   No application logic or content changes. */
+
+/* Shared search shell */
+.hero-premium form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 820px;
+  min-height: 76px;
+  padding: 8px;
+  border: 1px solid var(--benefy-border-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+
+.hero-premium form > svg {
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  margin-inline: 10px 2px;
+}
+
+.hero-premium form input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 54px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  font-size: 17px;
+}
+
+.hero-premium form input::placeholder {
+  opacity: 1;
+}
+
+.hero-premium form .search-3d {
+  flex: 0 0 auto;
+  min-width: 164px;
+  min-height: 58px;
+  padding: 0 24px;
+  border-radius: 999px;
+}
+
+/* Dark mode: same charcoal family as the personal-price panel */
+:root[data-theme="dark"] .hero-premium form {
+  border-color: rgba(159, 173, 186, .24);
+  background: #202328;
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .34),
+    inset 0 1px rgba(255, 255, 255, .035);
+}
+
+:root[data-theme="dark"] .hero-premium form:focus-within {
+  border-color: rgba(140, 191, 247, .42);
+  background: #23272c;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, .42),
+    0 0 0 4px rgba(140, 191, 247, .07),
+    inset 0 1px rgba(255, 255, 255, .045);
+}
+
+:root[data-theme="dark"] .hero-premium form > svg {
+  color: #9ba7b2;
+}
+
+:root[data-theme="dark"] .hero-premium form input {
+  color: #f1f4f6;
+  background: transparent;
+  caret-color: var(--benefy-blue-strong);
+}
+
+:root[data-theme="dark"] .hero-premium form input::placeholder {
+  color: #858f98;
+}
+
+/* Light mode remains bright, with the same pastel-blue brand */
+:root[data-theme="light"] .hero-premium form {
+  border-color: rgba(62, 143, 216, .20);
+  background: #ffffff;
+  box-shadow:
+    0 20px 55px rgba(34, 66, 99, .13),
+    inset 0 1px rgba(255, 255, 255, .95);
+}
+
+:root[data-theme="light"] .hero-premium form:focus-within {
+  border-color: rgba(62, 143, 216, .42);
+  background: #ffffff;
+  box-shadow:
+    0 26px 68px rgba(34, 66, 99, .16),
+    0 0 0 4px rgba(140, 191, 247, .12);
+}
+
+:root[data-theme="light"] .hero-premium form > svg {
+  color: #708191;
+}
+
+:root[data-theme="light"] .hero-premium form input {
+  color: #172231;
+  background: transparent;
+  caret-color: var(--benefy-blue-deep);
+}
+
+:root[data-theme="light"] .hero-premium form input::placeholder {
+  color: #7a8793;
+}
+
+/* Mobile stacking without losing the pill appearance */
+@media (max-width: 650px) {
+  .hero-premium form {
+    min-height: 68px;
+    padding: 7px;
+    gap: 4px;
+  }
+
+  .hero-premium form > svg {
+    width: 19px;
+    height: 19px;
+    margin-inline: 8px 0;
+  }
+
+  .hero-premium form input {
+    min-height: 50px;
+    padding-inline: 8px;
+    font-size: 15px;
+  }
+
+  .hero-premium form .search-3d {
+    width: auto;
+    min-width: 124px;
+    min-height: 52px;
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 450px) {
+  .hero-premium form {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    border-radius: 24px;
+  }
+
+  .hero-premium form .search-3d {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-premium form {
+    transition: none;
+  }
+}
