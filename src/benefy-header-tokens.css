@@ -1,0 +1,234 @@
+/* BENEFY token badge and slower header transitions.
+   Loaded after benefy-header-v5.css. */
+
+.topbar,
+.topbar.is-compact {
+  transition:
+    width .72s cubic-bezier(.22, 1, .36, 1),
+    min-height .72s cubic-bezier(.22, 1, .36, 1),
+    padding .72s cubic-bezier(.22, 1, .36, 1),
+    border-radius .72s cubic-bezier(.22, 1, .36, 1),
+    column-gap .72s cubic-bezier(.22, 1, .36, 1),
+    background .45s ease,
+    box-shadow .45s ease;
+}
+
+.topbar .nav-3d button,
+.topbar .header-control,
+.topbar .site-logo,
+.topbar .site-logo__image,
+.brand-cluster,
+.benefy-token-badge {
+  transition:
+    width .72s cubic-bezier(.22, 1, .36, 1),
+    height .72s cubic-bezier(.22, 1, .36, 1),
+    padding .72s cubic-bezier(.22, 1, .36, 1),
+    margin .72s cubic-bezier(.22, 1, .36, 1),
+    gap .72s cubic-bezier(.22, 1, .36, 1),
+    opacity .42s ease,
+    transform .72s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* The logo and token indicator form one left-side brand cluster. */
+.topbar > .brand-cluster {
+  grid-area: logo;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin-left: 5px;
+}
+
+.topbar > .brand-cluster > .site-logo {
+  position: relative;
+  width: 246px;
+  height: 66px;
+  flex: 0 0 246px;
+  margin: 0;
+  overflow: visible;
+}
+
+.topbar > .brand-cluster > .site-logo .site-logo__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+  transform: scale(1.34);
+  transform-origin: left center;
+}
+
+/* Token badge */
+.benefy-token-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 6px 12px 6px 9px;
+  border: 1px solid var(--benefy-border);
+  border-radius: 999px;
+  color: var(--benefy-text);
+  background: color-mix(in srgb, var(--benefy-panel-raised) 76%, transparent);
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+  white-space: nowrap;
+}
+
+.benefy-token-badge__icon {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 31px;
+  height: 21px;
+  padding: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(107, 130, 151, .38);
+  border-radius: 7px;
+  background: linear-gradient(135deg, #e9eef3 0%, #94a6b7 42%, #dfe7ed 63%, #718597 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.72), 0 4px 10px rgba(0,0,0,.16);
+  transform: rotate(-4deg);
+}
+
+.benefy-token-badge__icon::after {
+  content: "";
+  position: absolute;
+  inset: 4px 3px;
+  border-top: 1px solid rgba(67, 84, 99, .42);
+  border-bottom: 1px solid rgba(67, 84, 99, .34);
+}
+
+.benefy-token-badge__icon i {
+  border-right: 1px solid rgba(67, 84, 99, .36);
+}
+
+.benefy-token-badge__icon i:last-child {
+  border-right: 0;
+}
+
+.benefy-token-badge__content {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1;
+}
+
+.benefy-token-badge__label {
+  font-family: var(--font-latin, Inter, Arial, sans-serif);
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--benefy-muted);
+  letter-spacing: -.01em;
+}
+
+.benefy-token-badge__count {
+  min-width: 12px;
+  font-family: var(--font-latin, Inter, Arial, sans-serif);
+  font-size: 16px;
+  font-weight: 820;
+  color: var(--benefy-blue-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-theme="light"] .benefy-token-badge {
+  background: rgba(255,255,255,.76);
+  box-shadow: 0 7px 18px rgba(31, 65, 99, .08), inset 0 1px rgba(255,255,255,.92);
+}
+
+/* Compact state: keep the token count, hide only the label. */
+.topbar.is-compact > .brand-cluster {
+  gap: 5px;
+  margin-left: 2px;
+}
+
+.topbar.is-compact > .brand-cluster > .site-logo {
+  width: 105px;
+  height: 48px;
+  flex-basis: 105px;
+}
+
+.topbar.is-compact > .brand-cluster > .site-logo .site-logo__image {
+  transform: scale(1.25);
+}
+
+.topbar.is-compact .benefy-token-badge {
+  min-height: 36px;
+  padding: 5px 8px;
+  gap: 6px;
+}
+
+.topbar.is-compact .benefy-token-badge__label {
+  display: none;
+}
+
+.topbar.is-compact .benefy-token-badge__icon {
+  width: 27px;
+  height: 19px;
+}
+
+.topbar.is-compact .benefy-token-badge__count {
+  font-size: 14px;
+}
+
+@media (max-width: 1050px) {
+  .topbar > .brand-cluster > .site-logo {
+    width: 190px;
+    height: 60px;
+    flex-basis: 190px;
+  }
+
+  .benefy-token-badge__label {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar > .brand-cluster,
+  .topbar.is-compact > .brand-cluster {
+    grid-area: logo;
+    justify-self: start;
+    gap: 5px;
+    margin-left: 2px;
+  }
+
+  .topbar > .brand-cluster > .site-logo,
+  .topbar.is-compact > .brand-cluster > .site-logo {
+    width: 150px;
+    height: 50px;
+    flex-basis: 150px;
+  }
+
+  .topbar > .brand-cluster > .site-logo .site-logo__image,
+  .topbar.is-compact > .brand-cluster > .site-logo .site-logo__image {
+    transform: scale(1.2);
+  }
+
+  .benefy-token-badge {
+    min-height: 34px;
+    padding: 4px 7px;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar > .brand-cluster,
+  .topbar.is-compact > .brand-cluster {
+    justify-self: center;
+  }
+
+  .topbar > .brand-cluster > .site-logo,
+  .topbar.is-compact > .brand-cluster > .site-logo {
+    width: 138px;
+    flex-basis: 138px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .topbar.is-compact,
+  .topbar .nav-3d button,
+  .topbar .header-control,
+  .brand-cluster,
+  .benefy-token-badge {
+    transition: none;
+  }
+}
