@@ -1,0 +1,119 @@
+/* BENEFY header logo fit and alignment
+   Visual-only override. No application logic changes. */
+
+.topbar {
+  position: sticky;
+}
+
+/* Anchor the logo to the right edge of the floating header */
+.topbar > .site-logo {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  left: auto;
+  width: 168px;
+  height: 58px;
+  margin: 0;
+  transform: translateY(-50%);
+  overflow: visible;
+  z-index: 2;
+}
+
+.topbar > .site-logo .site-logo__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+  transform: scale(1.22);
+  transform-origin: right center;
+}
+
+.topbar > .site-logo:hover .site-logo__image {
+  transform: scale(1.26);
+}
+
+/* Compact floating header while scrolling */
+.topbar.is-compact > .site-logo {
+  right: 10px;
+  width: 78px;
+  height: 42px;
+  flex-basis: auto;
+}
+
+.topbar.is-compact > .site-logo .site-logo__image {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.18);
+  transform-origin: right center;
+}
+
+.topbar.is-compact > .site-logo:hover .site-logo__image {
+  transform: scale(1.22);
+}
+
+/* Keep the navigation visually centered despite the absolute logo */
+.topbar > .nav-3d {
+  justify-self: center;
+}
+
+/* Avoid overlap between the right-side logo and header controls */
+@media (min-width: 901px) {
+  .topbar {
+    padding-right: 194px;
+  }
+
+  .topbar.is-compact {
+    padding-right: 92px;
+  }
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .topbar > .site-logo {
+    right: 13px;
+    width: 142px;
+    height: 52px;
+  }
+
+  .topbar.is-compact > .site-logo {
+    right: 9px;
+    width: 70px;
+    height: 40px;
+  }
+}
+
+/* Mobile header wraps, so keep the logo centered and fully visible */
+@media (max-width: 650px) {
+  .topbar > .site-logo,
+  .topbar.is-compact > .site-logo {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 150px;
+    height: 54px;
+    margin: 0 auto 4px;
+    transform: none;
+    flex: 0 0 100%;
+  }
+
+  .topbar > .site-logo .site-logo__image,
+  .topbar.is-compact > .site-logo .site-logo__image {
+    object-position: center;
+    transform: scale(1.2);
+    transform-origin: center;
+  }
+
+  .topbar > .site-logo:hover .site-logo__image,
+  .topbar.is-compact > .site-logo:hover .site-logo__image {
+    transform: scale(1.23);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar > .site-logo .site-logo__image {
+    transition: none;
+  }
+}
