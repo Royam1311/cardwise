@@ -1,26 +1,218 @@
-import React,{useEffect,useState}from'react';
-import{Search,CreditCard,LogOut,Plus,Trash2,ShieldCheck,Sparkles,User,Tag,Settings,Store,Package,Percent,Check,Wifi,ExternalLink,ImageOff,RefreshCw,Languages,Moon,Sun}from'lucide-react';
-import{supabase,configured}from'./supabase';
-import{translations}from'./translations';
-const FALLBACK_CARDS=[['visa','Visa רגיל'],['tav','תו הזהב'],['htz','הייטקזון'],['max','MAX'],['isracard','ישראכרט'],['haver','חבר'],['behatsdaa','בהצדעה']];
-const CARD_META={visa:['VISA','PERSONAL CREDIT','visa','V'],max:['MAX','PREMIUM CREDIT','max','M'],haver:['חבר','CONSUMER CLUB','haver','ח'],isracard:['ישראכרט','PERSONAL CREDIT','isracard','י'],htz:['הייטקזון','TECH BENEFITS','htz','H'],tav:['תו הזהב','GIFT BENEFITS','tav','ת'],behatsdaa:['בהצדעה','CONSUMER CLUB','behatsdaa','ב']};
-const money=(v,l)=>new Intl.NumberFormat(l==='he'?'he-IL':'en-US',{style:'currency',currency:'ILS',maximumFractionDigits:0}).format(Number(v||0));
-const pref=(k,f)=>{try{return localStorage.getItem(k)||f}catch{return f}};
-function GoogleMark(){return <span className="google-mark" aria-hidden="true"><i>G</i></span>}
-function Auth({onDemo,t}){const[mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false),[googleBusy,setGoogleBusy]=useState(false);
-async function submit(e){e.preventDefault();setMsg('');if(!configured)return setMsg(t.missingConfig);setBusy(true);const{error}=mode==='login'?await supabase.auth.signInWithPassword({email,password}):await supabase.auth.signUp({email,password});setBusy(false);setMsg(error?error.message:mode==='login'?t.signedIn:t.confirmation)}
-async function google(){setMsg('');if(!configured)return setMsg(t.missingConfig);setGoogleBusy(true);const{error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin}});if(error){setMsg(error.message);setGoogleBusy(false)}}
-return <main className="auth"><section className="brand-panel"><div className="logo"><CreditCard/> BENEFY</div><h1>{t.loginTitle}</h1><p>{t.loginText}</p><div className="feature"><ShieldCheck/> {t.privacy}</div></section><section className="auth-card"><h2>{mode==='login'?t.signIn:t.createAccount}</h2><button type="button" className="google-login-button" onClick={google} disabled={googleBusy||busy}><GoogleMark/><span>{googleBusy?t.googleLoading:t.google}</span></button><div className="auth-divider"><span>{t.or}</span></div><form onSubmit={submit}><label>{t.email}<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>{t.password}<input type="password" minLength="6" value={password} onChange={e=>setPassword(e.target.value)} required/></label><button className="primary" disabled={busy||googleBusy}>{busy?t.loading:mode==='login'?t.login:t.register}</button></form>{msg&&<div className="notice">{msg}</div>}<button className="link" onClick={()=>setMode(mode==='login'?'register':'login')}>{mode==='login'?t.noAccount:t.haveAccount}</button><button className="demo" onClick={onDemo}>{t.demo}</button></section></main>}
-function WalletCard({code,name,selected,onToggle,t}){const[label,subtitle,theme,monogram]=CARD_META[code]||[name,'BENEFIT PROGRAM','default',name?.[0]||'?'];return <button type="button" className={`wallet-card wallet-card--${theme} ${selected?'is-selected':''}`} onClick={onToggle}><span className="wallet-card__top"><span className="wallet-card__brand"><span className="wallet-card__monogram">{monogram}</span><span><strong>{label}</strong><small>{subtitle}</small></span></span><span className={`wallet-card__status ${selected?'is-active':''}`}>{selected?<><Check/> {t.active}</>:t.available}</span></span><span className="wallet-card__middle"><span className="wallet-card__chip"><i/><i/><i/><i/></span><Wifi/></span><span className="wallet-card__bottom"><span><small>BENEFY WALLET</small><strong>•••• BENEFITS</strong></span><span className="wallet-card__action">{selected?<Trash2/>:<Plus/>}{selected?t.remove:t.add}</span></span></button>}
-function ProductVisual({image,name,t}){const[failed,setFailed]=useState(false);return !image||failed?<div className="product-visual product-visual--empty"><ImageOff/><span>{t.imagePending}</span></div>:<div className="product-visual"><img src={image} alt={name} onError={()=>setFailed(true)}/></div>}
-function Admin({t}){const[counts,setCounts]=useState({products:0,stores:0,benefits:0}),[busy,setBusy]=useState(false);async function load(){setBusy(true);const[p,s,b]=await Promise.all([supabase.from('products').select('*',{count:'exact',head:true}),supabase.from('stores').select('*',{count:'exact',head:true}),supabase.from('benefit_rules').select('*',{count:'exact',head:true})]);setCounts({products:p.count||0,stores:s.count||0,benefits:b.count||0});setBusy(false)}useEffect(()=>{load()},[]);const items=[[Package,t.products,counts.products],[Store,t.stores,counts.stores],[Percent,t.benefits,counts.benefits]];return <section className="page"><div className="page-title"><div><h1>{t.adminTitle}</h1><p>{t.adminText}</p></div><button className="secondary" onClick={load}><RefreshCw className={busy?'spin':''}/>{t.refresh}</button></div><div className="admin-cards">{items.map(([I,l,c])=><article key={l}><I/><span>{l}</span><strong>{c}</strong></article>)}</div></section>}
-export default function App(){const[session,setSession]=useState(null),[demo,setDemo]=useState(false),[cards,setCards]=useState([]),[cardCatalog,setCardCatalog]=useState(FALLBACK_CARDS),[query,setQuery]=useState(''),[tab,setTab]=useState('search'),[loading,setLoading]=useState(true),[isAdmin,setIsAdmin]=useState(false),[searching,setSearching]=useState(false),[searchError,setSearchError]=useState(''),[product,setProduct]=useState(null),[offers,setOffers]=useState([]),[hasSearched,setHasSearched]=useState(false),[language,setLanguage]=useState(()=>pref('benefy-language','he')),[theme,setTheme]=useState(()=>pref('benefy-theme','light'));const t=translations[language]||translations.he;
-useEffect(()=>{document.documentElement.lang=language;document.documentElement.dir=language==='he'?'rtl':'ltr';document.documentElement.dataset.theme=theme;try{localStorage.setItem('benefy-language',language);localStorage.setItem('benefy-theme',theme)}catch{}},[language,theme]);
-useEffect(()=>{if(!configured){setLoading(false);return}supabase.auth.getSession().then(({data})=>{setSession(data.session);setLoading(false)});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,next)=>setSession(next));return()=>subscription.unsubscribe()},[]);
-useEffect(()=>{if(session){loadUser();loadCatalog()}else if(demo)setCards(['visa','tav','htz'])},[session,demo]);
-async function loadUser(){const[{data:c},{data:p}]=await Promise.all([supabase.from('cards').select('card_code,card_type').eq('active',true).order('created_at'),supabase.from('profiles').select('role').eq('id',session.user.id).maybeSingle()]);setCards((c||[]).map(x=>x.card_code||x.card_type).filter(Boolean));setIsAdmin(p?.role==='admin')}
-async function loadCatalog(){const{data}=await supabase.from('card_programs').select('code,display_name').eq('active',true).order('display_name');if(data?.length)setCardCatalog(data.map(x=>[x.code,x.display_name]))}
-async function toggleCard(code){if(demo)return setCards(a=>a.includes(code)?a.filter(x=>x!==code):[...a,code]);if(cards.includes(code))await supabase.from('cards').delete().eq('user_id',session.user.id).eq('card_code',code);else{const p=cardCatalog.find(x=>x[0]===code);await supabase.from('cards').insert({user_id:session.user.id,card_code:code,card_type:code,card_name:p?.[1]||code,active:true})}loadUser()}
-async function inspect(url){if(!url)return null;try{const r=await fetch(`/api/inspect-product?url=${encodeURIComponent(url)}`);if(!r.ok)return null;return(await r.json())?.product?.image||null}catch{return null}}
-async function searchProducts(e){e?.preventDefault();const term=query.trim();setHasSearched(true);setSearchError('');setProduct(null);setOffers([]);if(!term)return setSearchError(t.emptySearch);if(!configured||demo)return setSearchError(t.liveOnly);setSearching(true);const{data:found,error:pe}=await supabase.from('products').select('id,product_name,sku,category,image_url').eq('active',true).or(`product_name.ilike.%${term}%,sku.ilike.%${term}%,category.ilike.%${term}%`).limit(1);if(pe||!found?.length){setSearching(false);return setSearchError(pe?.message||t.notFound)}const fp=found[0],{data:prices,error:pre}=await supabase.from('prices').select('id,store_id,price,shipping,updated_at,product_url').eq('product_id',fp.id).eq('active',true);if(pre){setSearching(false);return setSearchError(pre.message)}const ids=[...new Set((prices||[]).map(x=>x.store_id).filter(Boolean))],sr=ids.length?await supabase.from('stores').select('id,store_name,website').in('id',ids):{data:[]};let br=[];if(ids.length&&cards.length){const{data}=await supabase.from('benefit_rules').select('*').in('program_code',cards).in('store_id',ids).eq('active',true);br=data||[]}const image=fp.image_url||await inspect(prices?.[0]?.product_url);setProduct({...fp,image_url:image});const now=Date.now(),active=r=>(!r.start_date||new Date(r.start_date)<=now)&&(!r.end_date||new Date(r.end_date)>=now),calc=(price,r)=>{const v=Number(r.discount_value||0);if(!v||price<Number(r.min_purchase||0))return null;if(r.benefit_type==='special_price')return{saving:Math.max(0,price-v),checkout:v,effective:v};let s=r.discount_unit==='percent'?price*v/100:v,cap=Number(r.max_discount_cap||0);if(cap>0)s=Math.min(s,cap);s=Math.max(0,Math.min(s,price));const d=['cashback','loaded_card','voucher'].includes(r.benefit_type);return{saving:s,checkout:d?price:price-s,effective:price-s}};const combined=(prices||[]).map(row=>{const store=(sr.data||[]).find(x=>x.id===row.store_id),price=Number(row.price||0),shipping=Number(row.shipping||0),best=br.filter(r=>r.store_id===row.store_id&&active(r)).map(rule=>({rule,result:calc(price,rule)})).filter(x=>x.result).sort((a,b)=>a.result.effective-b.result.effective)[0],effective=best?.result.effective??price,pn=best?(cardCatalog.find(x=>x[0]===best.rule.program_code)?.[1]||best.rule.program_code):null;return{id:row.id,store:store?.store_name||t.stores,website:row.product_url||store?.website||null,price,shipping,effective,checkout:best?.result.checkout??price,total:effective+shipping,saving:best?.result.saving||0,benefit:best?.rule||null,note:best?`${pn}: ${best.rule.title||t.activeBenefit}`:t.basePrice}}).sort((a,b)=>a.total-b.total);setOffers(combined);if(!combined.length)setSearchError(t.noPrices);setSearching(false)}
-if(loading)return <div className="center">{t.loading}</div>;if(!session&&!demo)return <Auth onDemo={()=>setDemo(true)} t={t}/>;const email=session?.user?.email||t.demoUser,tabs=[[Search,'search',t.search],[CreditCard,'cards',t.wallet],...(isAdmin?[[Settings,'admin',t.admin]]:[])];return <div dir={language==='he'?'rtl':'ltr'}><header className="topbar"><div className="logo dark">BENEFY <CreditCard/></div><nav className="nav-3d">{tabs.map(([I,k,l])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}><span className="nav-icon"><I/></span><span>{l}</span></button>)}</nav><div className="header-actions"><button className="header-control" onClick={()=>setLanguage(language==='he'?'en':'he')}><Languages/><span>{t.languageButton}</span></button><button className="header-control theme-control" onClick={()=>setTheme(theme==='light'?'dark':'light')}>{theme==='light'?<Moon/>:<Sun/>}</button><div className="user"><User/>{email}<button onClick={()=>session?supabase.auth.signOut():setDemo(false)}><LogOut/></button></div></div></header>{tab==='admin'?<Admin t={t}/>:tab==='cards'?<section className="page"><div className="wallet-heading"><div><h1>{t.wallet}</h1><p>{t.walletText}</p></div><div className="wallet-counter"><CreditCard/><strong>{cards.length}</strong> {t.activePrograms}</div></div><div className="wallet-grid">{cardCatalog.map(([c,n])=><WalletCard key={c} code={c} name={n} selected={cards.includes(c)} onToggle={()=>toggleCard(c)} t={t}/>)}</div></section>:<><section className="hero-premium"><span><Sparkles/>{t.heroBadge}</span><h1>{t.heroLine1}<br/>{t.heroLine2}</h1><form onSubmit={searchProducts}><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t.placeholder}/><button className="primary search-3d" disabled={searching}>{searching?t.searching:t.compare}</button></form></section><section className="page results-premium">{searchError&&<div className="warning full-row">{searchError}</div>}{!hasSearched&&<div className="welcome-card full-row"><Sparkles/><div><strong>{t.startTitle}</strong><span>{t.startText}</span></div></div>}{product&&<><aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t}/><span className="category">{product.category||t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku||'-'}</p><div className="summary"><Tag/>{t.activeCards}: {cards.length}</div></aside><main><h2>{t.foundPrices}</h2>{offers.map((o,i)=><article className={`offer-card ${i===0?'best':''}`} key={o.id}>{i===0&&<b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{o.store.slice(0,1)}</div><div><h3>{o.store}</h3><small><ShieldCheck/>{t.source}</small></div></div><div className="price-block">{o.saving>0&&<del>{money(o.price,language)}</del>}<strong>{money(o.effective,language)}</strong><span>{o.note}</span>{o.saving>0&&<p className="saving-line">{t.saving}: <b>{money(o.saving,language)}</b>{o.checkout!==o.effective?` | ${t.checkout}: ${money(o.checkout,language)}`:''}</p>}{o.benefit?.notes?.includes('TEST')&&<p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {o.shipping?money(o.shipping,language):t.free} | {t.total}: <b>{money(o.total,language)}</b></p></div>{o.website?<button className="store-button" onClick={()=>window.open(o.website,'_blank','noopener,noreferrer')}>{t.storeButton}<ExternalLink/></button>:<button disabled>{t.noLink}</button>}</article>)}</main></>}</section></>}</div>}
+import React, { useEffect, useState } from 'react';
+import {
+  Search, CreditCard, LogOut, Plus, Trash2, ShieldCheck, Sparkles,
+  User, Tag, Settings, Store, Package, Percent, Check, Wifi,
+  ExternalLink, ImageOff, RefreshCw, Languages, Moon, Sun
+} from 'lucide-react';
+import { supabase, configured } from './supabase';
+import { translations } from './translations';
+
+const FALLBACK_CARDS = [
+  ['visa', 'Visa רגיל'], ['tav', 'תו הזהב'], ['htz', 'הייטקזון'],
+  ['max', 'MAX'], ['isracard', 'ישראכרט'], ['haver', 'חבר'], ['behatsdaa', 'בהצדעה']
+];
+
+const CARD_META = {
+  visa: ['VISA', 'PERSONAL CREDIT', 'visa', 'V'],
+  max: ['MAX', 'PREMIUM CREDIT', 'max', 'M'],
+  haver: ['חבר', 'CONSUMER CLUB', 'haver', 'ח'],
+  isracard: ['ישראכרט', 'PERSONAL CREDIT', 'isracard', 'י'],
+  htz: ['הייטקזון', 'TECH BENEFITS', 'htz', 'H'],
+  tav: ['תו הזהב', 'GIFT BENEFITS', 'tav', 'ת'],
+  behatsdaa: ['בהצדעה', 'CONSUMER CLUB', 'behatsdaa', 'ב']
+};
+
+const money = (value, language) => new Intl.NumberFormat(language === 'he' ? 'he-IL' : 'en-US', {
+  style: 'currency', currency: 'ILS', maximumFractionDigits: 0
+}).format(Number(value || 0));
+
+const readPreference = (key, fallback) => {
+  try { return localStorage.getItem(key) || fallback; }
+  catch { return fallback; }
+};
+
+function AdaptiveLogo({ className = '' }) {
+  return (
+    <div className={`site-logo ${className}`} aria-label="BENEFY">
+      <img className="site-logo__image site-logo__image--light" src="/benefy-logo-black.png" alt="BENEFY" />
+      <img className="site-logo__image site-logo__image--dark" src="/benefy-logo-white.png" alt="" aria-hidden="true" />
+    </div>
+  );
+}
+
+function GoogleMark() {
+  return <span className="google-mark" aria-hidden="true"><i>G</i></span>;
+}
+
+function Auth({ onDemo, t }) {
+  const [mode, setMode] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault(); setMsg('');
+    if (!configured) return setMsg(t.missingConfig);
+    setBusy(true);
+    const { error } = mode === 'login'
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+    setBusy(false);
+    setMsg(error ? error.message : mode === 'login' ? t.signedIn : t.confirmation);
+  }
+
+  async function google() {
+    setMsg('');
+    if (!configured) return setMsg(t.missingConfig);
+    setGoogleBusy(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google', options: { redirectTo: window.location.origin }
+    });
+    if (error) { setMsg(error.message); setGoogleBusy(false); }
+  }
+
+  return (
+    <main className="auth">
+      <section className="brand-panel">
+        <AdaptiveLogo className="site-logo--auth" />
+        <h1>{t.loginTitle}</h1><p>{t.loginText}</p>
+        <div className="feature"><ShieldCheck /> {t.privacy}</div>
+      </section>
+      <section className="auth-card">
+        <h2>{mode === 'login' ? t.signIn : t.createAccount}</h2>
+        <button type="button" className="google-login-button" onClick={google} disabled={googleBusy || busy}>
+          <GoogleMark /><span>{googleBusy ? t.googleLoading : t.google}</span>
+        </button>
+        <div className="auth-divider"><span>{t.or}</span></div>
+        <form onSubmit={submit}>
+          <label>{t.email}<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
+          <label>{t.password}<input type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} required /></label>
+          <button className="primary" disabled={busy || googleBusy}>{busy ? t.loading : mode === 'login' ? t.login : t.register}</button>
+        </form>
+        {msg && <div className="notice">{msg}</div>}
+        <button className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? t.noAccount : t.haveAccount}</button>
+        <button className="demo" onClick={onDemo}>{t.demo}</button>
+      </section>
+    </main>
+  );
+}
+
+function WalletCard({ code, name, selected, onToggle, t }) {
+  const [label, subtitle, theme, monogram] = CARD_META[code] || [name, 'BENEFIT PROGRAM', 'default', name?.[0] || '?'];
+  return <button type="button" className={`wallet-card wallet-card--${theme} ${selected ? 'is-selected' : ''}`} onClick={onToggle}>
+    <span className="wallet-card__top"><span className="wallet-card__brand"><span className="wallet-card__monogram">{monogram}</span><span><strong>{label}</strong><small>{subtitle}</small></span></span><span className={`wallet-card__status ${selected ? 'is-active' : ''}`}>{selected ? <><Check /> {t.active}</> : t.available}</span></span>
+    <span className="wallet-card__middle"><span className="wallet-card__chip"><i /><i /><i /><i /></span><Wifi /></span>
+    <span className="wallet-card__bottom"><span><small>BENEFY WALLET</small><strong>•••• BENEFITS</strong></span><span className="wallet-card__action">{selected ? <Trash2 /> : <Plus />}{selected ? t.remove : t.add}</span></span>
+  </button>;
+}
+
+function ProductVisual({ image, name, t }) {
+  const [failed, setFailed] = useState(false);
+  return !image || failed
+    ? <div className="product-visual product-visual--empty"><ImageOff /><span>{t.imagePending}</span></div>
+    : <div className="product-visual"><img src={image} alt={name} onError={() => setFailed(true)} /></div>;
+}
+
+function Admin({ t }) {
+  const [counts, setCounts] = useState({ products: 0, stores: 0, benefits: 0 });
+  const [busy, setBusy] = useState(false);
+  async function load() {
+    setBusy(true);
+    const [p, s, b] = await Promise.all([
+      supabase.from('products').select('*', { count: 'exact', head: true }),
+      supabase.from('stores').select('*', { count: 'exact', head: true }),
+      supabase.from('benefit_rules').select('*', { count: 'exact', head: true })
+    ]);
+    setCounts({ products: p.count || 0, stores: s.count || 0, benefits: b.count || 0 }); setBusy(false);
+  }
+  useEffect(() => { load(); }, []);
+  const items = [[Package, t.products, counts.products], [Store, t.stores, counts.stores], [Percent, t.benefits, counts.benefits]];
+  return <section className="page"><div className="page-title"><div><h1>{t.adminTitle}</h1><p>{t.adminText}</p></div><button className="secondary" onClick={load}><RefreshCw className={busy ? 'spin' : ''} />{t.refresh}</button></div><div className="admin-cards">{items.map(([Icon, label, count]) => <article key={label}><Icon /><span>{label}</span><strong>{count}</strong></article>)}</div></section>;
+}
+
+export default function App() {
+  const [session, setSession] = useState(null), [demo, setDemo] = useState(false), [cards, setCards] = useState([]);
+  const [cardCatalog, setCardCatalog] = useState(FALLBACK_CARDS), [query, setQuery] = useState(''), [tab, setTab] = useState('search');
+  const [loading, setLoading] = useState(true), [isAdmin, setIsAdmin] = useState(false), [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(''), [product, setProduct] = useState(null), [offers, setOffers] = useState([]), [hasSearched, setHasSearched] = useState(false);
+  const [language, setLanguage] = useState(() => readPreference('benefy-language', 'he'));
+  const [theme, setTheme] = useState(() => readPreference('benefy-theme', 'light'));
+  const t = translations[language] || translations.he;
+
+  useEffect(() => {
+    document.documentElement.lang = language; document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr'; document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('benefy-language', language); localStorage.setItem('benefy-theme', theme); } catch {}
+  }, [language, theme]);
+  useEffect(() => {
+    if (!configured) { setLoading(false); return; }
+    supabase.auth.getSession().then(({ data }) => { setSession(data.session); setLoading(false); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+    return () => subscription.unsubscribe();
+  }, []);
+  useEffect(() => { if (session) { loadUser(); loadCatalog(); } else if (demo) setCards(['visa', 'tav', 'htz']); }, [session, demo]);
+
+  async function loadUser() {
+    const [{ data: c }, { data: p }] = await Promise.all([
+      supabase.from('cards').select('card_code,card_type').eq('active', true).order('created_at'),
+      supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
+    ]);
+    setCards((c || []).map(x => x.card_code || x.card_type).filter(Boolean)); setIsAdmin(p?.role === 'admin');
+  }
+  async function loadCatalog() {
+    const { data } = await supabase.from('card_programs').select('code,display_name').eq('active', true).order('display_name');
+    if (data?.length) setCardCatalog(data.map(x => [x.code, x.display_name]));
+  }
+  async function toggleCard(code) {
+    if (demo) return setCards(a => a.includes(code) ? a.filter(x => x !== code) : [...a, code]);
+    if (cards.includes(code)) await supabase.from('cards').delete().eq('user_id', session.user.id).eq('card_code', code);
+    else { const p = cardCatalog.find(x => x[0] === code); await supabase.from('cards').insert({ user_id: session.user.id, card_code: code, card_type: code, card_name: p?.[1] || code, active: true }); }
+    loadUser();
+  }
+  async function inspect(url) {
+    if (!url) return null;
+    try { const response = await fetch(`/api/inspect-product?url=${encodeURIComponent(url)}`); if (!response.ok) return null; return (await response.json())?.product?.image || null; }
+    catch { return null; }
+  }
+  async function searchProducts(event) {
+    event?.preventDefault(); const term = query.trim(); setHasSearched(true); setSearchError(''); setProduct(null); setOffers([]);
+    if (!term) return setSearchError(t.emptySearch); if (!configured || demo) return setSearchError(t.liveOnly); setSearching(true);
+    const { data: found, error: productError } = await supabase.from('products').select('id,product_name,sku,category,image_url').eq('active', true).or(`product_name.ilike.%${term}%,sku.ilike.%${term}%,category.ilike.%${term}%`).limit(1);
+    if (productError || !found?.length) { setSearching(false); return setSearchError(productError?.message || t.notFound); }
+    const foundProduct = found[0];
+    const { data: prices, error: priceError } = await supabase.from('prices').select('id,store_id,price,shipping,updated_at,product_url').eq('product_id', foundProduct.id).eq('active', true);
+    if (priceError) { setSearching(false); return setSearchError(priceError.message); }
+    const ids = [...new Set((prices || []).map(x => x.store_id).filter(Boolean))];
+    const storeResponse = ids.length ? await supabase.from('stores').select('id,store_name,website').in('id', ids) : { data: [] };
+    let benefitRules = [];
+    if (ids.length && cards.length) { const { data } = await supabase.from('benefit_rules').select('*').in('program_code', cards).in('store_id', ids).eq('active', true); benefitRules = data || []; }
+    const image = foundProduct.image_url || await inspect(prices?.[0]?.product_url); setProduct({ ...foundProduct, image_url: image });
+    const now = Date.now();
+    const isActive = rule => (!rule.start_date || new Date(rule.start_date) <= now) && (!rule.end_date || new Date(rule.end_date) >= now);
+    const calculate = (price, rule) => {
+      const value = Number(rule.discount_value || 0); if (!value || price < Number(rule.min_purchase || 0)) return null;
+      if (rule.benefit_type === 'special_price') return { saving: Math.max(0, price - value), checkout: value, effective: value };
+      let saving = rule.discount_unit === 'percent' ? price * value / 100 : value; const cap = Number(rule.max_discount_cap || 0);
+      if (cap > 0) saving = Math.min(saving, cap); saving = Math.max(0, Math.min(saving, price));
+      const deferred = ['cashback', 'loaded_card', 'voucher'].includes(rule.benefit_type);
+      return { saving, checkout: deferred ? price : price - saving, effective: price - saving };
+    };
+    const combined = (prices || []).map(row => {
+      const store = (storeResponse.data || []).find(x => x.id === row.store_id), price = Number(row.price || 0), shipping = Number(row.shipping || 0);
+      const best = benefitRules.filter(r => r.store_id === row.store_id && isActive(r)).map(rule => ({ rule, result: calculate(price, rule) })).filter(x => x.result).sort((a, b) => a.result.effective - b.result.effective)[0];
+      const effective = best?.result.effective ?? price; const programName = best ? (cardCatalog.find(x => x[0] === best.rule.program_code)?.[1] || best.rule.program_code) : null;
+      return { id: row.id, store: store?.store_name || t.stores, website: row.product_url || store?.website || null, price, shipping, effective, checkout: best?.result.checkout ?? price, total: effective + shipping, saving: best?.result.saving || 0, benefit: best?.rule || null, note: best ? `${programName}: ${best.rule.title || t.activeBenefit}` : t.basePrice };
+    }).sort((a, b) => a.total - b.total);
+    setOffers(combined); if (!combined.length) setSearchError(t.noPrices); setSearching(false);
+  }
+
+  if (loading) return <div className="center">{t.loading}</div>;
+  if (!session && !demo) return <Auth onDemo={() => setDemo(true)} t={t} />;
+  const email = session?.user?.email || t.demoUser;
+  const tabs = [[Search, 'search', t.search], [CreditCard, 'cards', t.wallet], ...(isAdmin ? [[Settings, 'admin', t.admin]] : [])];
+  return <div dir={language === 'he' ? 'rtl' : 'ltr'}>
+    <header className="topbar"><AdaptiveLogo /><nav className="nav-3d">{tabs.map(([Icon, key, label]) => <button key={key} className={tab === key ? 'active' : ''} onClick={() => setTab(key)}><span className="nav-icon"><Icon /></span><span>{label}</span></button>)}</nav><div className="header-actions"><button className="header-control" onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}><Languages /><span>{t.languageButton}</span></button><button className="header-control theme-control" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon /> : <Sun />}</button><div className="user"><User />{email}<button onClick={() => session ? supabase.auth.signOut() : setDemo(false)}><LogOut /></button></div></div></header>
+    {tab === 'admin' ? <Admin t={t} /> : tab === 'cards' ? <section className="page"><div className="wallet-heading"><div><h1>{t.wallet}</h1><p>{t.walletText}</p></div><div className="wallet-counter"><CreditCard /><strong>{cards.length}</strong> {t.activePrograms}</div></div><div className="wallet-grid">{cardCatalog.map(([code, name]) => <WalletCard key={code} code={code} name={name} selected={cards.includes(code)} onToggle={() => toggleCard(code)} t={t} />)}</div></section> : <><section className="hero-premium"><span><Sparkles />{t.heroBadge}</span><h1>{t.heroLine1}<br />{t.heroLine2}</h1><form onSubmit={searchProducts}><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.placeholder} /><button className="primary search-3d" disabled={searching}>{searching ? t.searching : t.compare}</button></form></section><section className="page results-premium">{searchError && <div className="warning full-row">{searchError}</div>}{!hasSearched && <div className="welcome-card full-row"><Sparkles /><div><strong>{t.startTitle}</strong><span>{t.startText}</span></div></div>}{product && <><aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t} /><span className="category">{product.category || t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku || '-'}</p><div className="summary"><Tag />{t.activeCards}: {cards.length}</div></aside><main><h2>{t.foundPrices}</h2>{offers.map((offer, index) => <article className={`offer-card ${index === 0 ? 'best' : ''}`} key={offer.id}>{index === 0 && <b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{offer.store.slice(0, 1)}</div><div><h3>{offer.store}</h3><small><ShieldCheck />{t.source}</small></div></div><div className="price-block">{offer.saving > 0 && <del>{money(offer.price, language)}</del>}<strong>{money(offer.effective, language)}</strong><span>{offer.note}</span>{offer.saving > 0 && <p className="saving-line">{t.saving}: <b>{money(offer.saving, language)}</b>{offer.checkout !== offer.effective ? ` | ${t.checkout}: ${money(offer.checkout, language)}` : ''}</p>}{offer.benefit?.notes?.includes('TEST') && <p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {offer.shipping ? money(offer.shipping, language) : t.free} | {t.total}: <b>{money(offer.total, language)}</b></p></div>{offer.website ? <button className="store-button" onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>{t.storeButton}<ExternalLink /></button> : <button disabled>{t.noLink}</button>}</article>)}</main></>}</section></>}
+  </div>;
+}
