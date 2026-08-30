@@ -5,6 +5,7 @@ import './styles.css';
 import './benefy-luxury.css';
 import './benefy-blue-theme.css';
 import './benefy-typography.css';
+import './benefy-logo-fit.css';
 import { enableCompactHeader } from './compactHeader';
 
 function Root() {
