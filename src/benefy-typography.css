@@ -1,4 +1,4 @@
-/* BENEFY Typography System
+/* BENEFY Typography System v2
    Typography and spacing only. No content or application logic changes. */
 
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -10,7 +10,7 @@
   --type-small: 13px;
   --type-label: 12px;
   --type-nav: 14px;
-  --type-title: clamp(42px, 6.3vw, 78px);
+  --type-title: clamp(44px, 6.2vw, 78px);
   --type-section: clamp(28px, 3vw, 38px);
   --type-card-title: 21px;
   --type-price: clamp(36px, 4.2vw, 48px);
@@ -45,16 +45,14 @@ textarea {
   font-family: inherit;
 }
 
-/* Brand */
 .logo {
   font-family: var(--font-latin);
   font-size: 23px;
   font-weight: 900;
   line-height: 1;
-  letter-spacing: .085em;
+  letter-spacing: 0.085em;
 }
 
-/* Navigation */
 .nav-3d button,
 .header-control,
 .user {
@@ -73,12 +71,11 @@ textarea {
   color: #c8cdca;
 }
 
-/* Hero */
 .hero-premium > span {
   font-size: 13px;
   font-weight: 650;
   line-height: 1;
-  letter-spacing: .015em;
+  letter-spacing: 0.015em;
 }
 
 .hero-premium h1 {
@@ -93,8 +90,8 @@ textarea {
 
 html[lang='he'] .hero-premium h1 {
   font-weight: 800;
-  letter-spacing: -0.042em;
   line-height: 1.07;
+  letter-spacing: -0.042em;
 }
 
 .hero-premium input {
@@ -115,7 +112,6 @@ html[lang='he'] .hero-premium h1 {
   letter-spacing: -0.012em;
 }
 
-/* Section hierarchy */
 .page h1,
 .results-premium main > h2,
 .admin-overview h1 {
@@ -139,7 +135,6 @@ html[lang='he'] .hero-premium h1 {
   line-height: 1.65;
 }
 
-/* Welcome and supporting text */
 .welcome-card strong {
   font-size: 18px;
   font-weight: 720;
@@ -154,7 +149,6 @@ html[lang='he'] .hero-premium h1 {
   line-height: 1.5;
 }
 
-/* Product and offer cards */
 .product-card h2 {
   margin: 9px 0 7px;
   font-size: 23px;
@@ -173,7 +167,7 @@ html[lang='he'] .hero-premium h1 {
   font-size: var(--type-label);
   font-weight: 700;
   line-height: 1;
-  letter-spacing: .045em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
@@ -202,6 +196,7 @@ html[lang='he'] .hero-premium h1 {
 }
 
 .price-block del {
+  display: block;
   margin-bottom: 3px;
   font-family: var(--font-latin);
   font-size: 15px;
@@ -213,7 +208,7 @@ html[lang='he'] .hero-premium h1 {
   font-size: var(--type-label);
   font-weight: 650;
   line-height: 1.35;
-  letter-spacing: .008em;
+  letter-spacing: 0.008em;
 }
 
 .price-block p,
@@ -231,7 +226,7 @@ html[lang='he'] .hero-premium h1 {
   font-size: var(--type-label);
   font-weight: 750;
   line-height: 1;
-  letter-spacing: .025em;
+  letter-spacing: 0.025em;
 }
 
 .store-button {
@@ -241,7 +236,6 @@ html[lang='he'] .hero-premium h1 {
   letter-spacing: -0.01em;
 }
 
-/* Wallet */
 .wallet-counter {
   font-size: 14px;
   font-weight: 500;
@@ -267,14 +261,14 @@ html[lang='he'] .hero-premium h1 {
   font-size: 9px;
   font-weight: 650;
   line-height: 1;
-  letter-spacing: .14em;
+  letter-spacing: 0.14em;
 }
 
 .wallet-card__bottom strong {
   font-family: var(--font-latin);
   font-size: 11px;
   font-weight: 650;
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
 }
 
 .wallet-card__status,
@@ -289,7 +283,6 @@ html[lang='he'] .hero-premium h1 {
   font-weight: 800;
 }
 
-/* Auth */
 .brand-panel h1 {
   max-width: 640px;
   margin-bottom: 18px;
@@ -353,7 +346,6 @@ html[lang='he'] .hero-premium h1 {
   line-height: 1.5;
 }
 
-/* Admin */
 .admin-cards article > span {
   font-size: 14px;
   font-weight: 550;
@@ -367,21 +359,20 @@ html[lang='he'] .hero-premium h1 {
   font-variant-numeric: tabular-nums;
 }
 
-/* English needs slightly more tracking restraint */
 html[lang='en'] .hero-premium h1,
 html[lang='en'] .brand-panel h1 {
   font-family: var(--font-latin);
   font-weight: 800;
 }
 
-@media(max-width:900px) {
+@media (max-width: 900px) {
   :root {
     --type-title: clamp(44px, 8vw, 66px);
     --type-price: 42px;
   }
 }
 
-@media(max-width:650px) {
+@media (max-width: 650px) {
   :root {
     --type-body: 15px;
     --type-title: 42px;
@@ -415,5 +406,3 @@ html[lang='en'] .brand-panel h1 {
     font-size: 21px;
   }
 }
-'''
-
