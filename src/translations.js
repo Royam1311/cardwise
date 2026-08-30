@@ -1,40 +1,8 @@
 export const translations = {
   he: {
-    search: 'חיפוש', wallet: 'הארנק שלי', admin: 'ניהול', loading: 'טוען...',
-    loginTitle: 'המחיר שמתאים דווקא לך', loginText: 'השוואת מחירים והטבות לפי הכרטיסים והמועדונים שלך.',
-    privacy: 'אין צורך להזין מספר כרטיס או CVV', signIn: 'כניסה לחשבון', createAccount: 'יצירת חשבון',
-    email: 'אימייל', password: 'סיסמה', login: 'כניסה', register: 'הרשמה', noAccount: 'אין לך חשבון? הרשמה',
-    haveAccount: 'כבר נרשמת? כניסה', demo: 'כניסה לגרסת הדגמה', missingConfig: 'חסרים משתני חיבור ל-Supabase.',
-    signedIn: 'התחברת בהצלחה', confirmation: 'נשלח אליך אימייל לאישור.', available: 'זמין', active: 'פעיל', add: 'הוסף', remove: 'הסר',
-    imagePending: 'תמונה תתווסף מהמקור', products: 'מוצרים', stores: 'חנויות', benefits: 'הטבות',
-    adminTitle: 'פאנל ניהול', adminText: 'תצוגת מצב של BENEFY.', refresh: 'רענון', walletText: 'בחר את הכרטיסים והמועדונים שלך. BENEFY יחשב את המחיר האישי.',
-    activePrograms: 'תוכניות פעילות', heroBadge: 'השוואת המחיר האישי שלך', heroLine1: 'מוצאים את העסקה שבאמת', heroLine2: 'הכי משתלמת עבורך',
-    placeholder: 'לדוגמה: iPhone, IVIPH17PORESIM או טלפונים', compare: 'השווה מחירים', searching: 'מחפש...',
-    startTitle: 'המחיר האישי מתחיל כאן', startText: 'חפש מוצר וקבל מחיר לאחר ההטבות שכבר יש לך.',
-    noCategory: 'ללא קטגוריה', sku: 'מק״ט', activeCards: 'הכרטיסים הפעילים', foundPrices: 'המחירים שמצאנו', best: 'הבחירה המשתלמת ביותר',
-    source: 'מקור מחיר במסד הנתונים', saving: 'חיסכון', checkout: 'מחיר בקופה', shipping: 'משלוח', free: 'חינם', total: 'סה״כ אפקטיבי',
-    storeButton: 'לחנות', noLink: 'אין קישור', testBenefit: 'הטבת בדיקה בלבד, אינה הצעה מסחרית מאומתת',
-    emptySearch: 'יש להזין שם מוצר או מק״ט.', liveOnly: 'החיפוש האמיתי זמין לאחר התחברות ל-Supabase.', notFound: 'לא נמצא מוצר מתאים.',
-    noPrices: 'המוצר נמצא, אך עדיין אין עבורו מחירים פעילים.', basePrice: 'מחיר בסיס, ללא הטבה פעילה', activeBenefit: 'הטבה פעילה',
-    demoUser: 'משתמש הדגמה', languageButton: 'English', themeLight: 'מצב בהיר', themeDark: 'מצב כהה', logout: 'יציאה'
+    search:'חיפוש',wallet:'הארנק שלי',admin:'ניהול',loading:'טוען...',loginTitle:'המחיר שמתאים דווקא לך',loginText:'השוואת מחירים והטבות לפי הכרטיסים והמועדונים שלך.',privacy:'אין צורך להזין מספר כרטיס או CVV',signIn:'כניסה לחשבון',createAccount:'יצירת חשבון',email:'אימייל',password:'סיסמה',login:'כניסה',register:'הרשמה',noAccount:'אין לך חשבון? הרשמה',haveAccount:'כבר נרשמת? כניסה',demo:'כניסה לגרסת הדגמה',missingConfig:'חסרים משתני חיבור ל-Supabase.',signedIn:'התחברת בהצלחה',confirmation:'נשלח אליך אימייל לאישור.',google:'המשך עם Google',googleLoading:'מעביר ל-Google...',or:'או',available:'זמין',active:'פעיל',add:'הוסף',remove:'הסר',imagePending:'תמונה תתווסף מהמקור',products:'מוצרים',stores:'חנויות',benefits:'הטבות',adminTitle:'פאנל ניהול',adminText:'תצוגת מצב של BENEFY.',refresh:'רענון',walletText:'בחר את הכרטיסים והמועדונים שלך. BENEFY יחשב את המחיר האישי.',activePrograms:'תוכניות פעילות',heroBadge:'השוואת המחיר האישי שלך',heroLine1:'מוצאים את העסקה שבאמת',heroLine2:'הכי משתלמת עבורך',placeholder:'לדוגמה: iPhone, IVIPH17PORESIM או טלפונים',compare:'השווה מחירים',searching:'מחפש...',startTitle:'המחיר האישי מתחיל כאן',startText:'חפש מוצר וקבל מחיר לאחר ההטבות שכבר יש לך.',noCategory:'ללא קטגוריה',sku:'מק״ט',activeCards:'הכרטיסים הפעילים',foundPrices:'המחירים שמצאנו',best:'הבחירה המשתלמת ביותר',source:'מקור מחיר במסד הנתונים',saving:'חיסכון',checkout:'מחיר בקופה',shipping:'משלוח',free:'חינם',total:'סה״כ אפקטיבי',storeButton:'לחנות',noLink:'אין קישור',testBenefit:'הטבת בדיקה בלבד, אינה הצעה מסחרית מאומתת',emptySearch:'יש להזין שם מוצר או מק״ט.',liveOnly:'החיפוש האמיתי זמין לאחר התחברות ל-Supabase.',notFound:'לא נמצא מוצר מתאים.',noPrices:'המוצר נמצא, אך עדיין אין עבורו מחירים פעילים.',basePrice:'מחיר בסיס, ללא הטבה פעילה',activeBenefit:'הטבה פעילה',demoUser:'משתמש הדגמה',languageButton:'English',themeLight:'מצב בהיר',themeDark:'מצב כהה',logout:'יציאה'
   },
   en: {
-    search: 'Search', wallet: 'My Wallet', admin: 'Admin', loading: 'Loading...',
-    loginTitle: 'The price that fits you', loginText: 'Compare prices and benefits based on your cards and clubs.',
-    privacy: 'No card number or CVV is required', signIn: 'Sign in', createAccount: 'Create account',
-    email: 'Email', password: 'Password', login: 'Sign in', register: 'Sign up', noAccount: 'No account? Sign up',
-    haveAccount: 'Already registered? Sign in', demo: 'Open demo', missingConfig: 'Supabase connection variables are missing.',
-    signedIn: 'Signed in successfully', confirmation: 'A confirmation email was sent.', available: 'Available', active: 'Active', add: 'Add', remove: 'Remove',
-    imagePending: 'Image will be added from the source', products: 'Products', stores: 'Stores', benefits: 'Benefits',
-    adminTitle: 'Admin Dashboard', adminText: 'BENEFY status overview.', refresh: 'Refresh', walletText: 'Select your cards and clubs. BENEFY will calculate your personalized price.',
-    activePrograms: 'active programs', heroBadge: 'Your personalized price comparison', heroLine1: 'Find the deal that is truly', heroLine2: 'best for you',
-    placeholder: 'For example: iPhone, IVIPH17PORESIM or phones', compare: 'Compare prices', searching: 'Searching...',
-    startTitle: 'Your personalized price starts here', startText: 'Search for a product and get a price after your existing benefits.',
-    noCategory: 'Uncategorized', sku: 'SKU', activeCards: 'Active programs', foundPrices: 'Prices we found', best: 'Best personalized choice',
-    source: 'Price source in database', saving: 'Savings', checkout: 'Checkout price', shipping: 'Shipping', free: 'Free', total: 'Effective total',
-    storeButton: 'Go to store', noLink: 'No link', testBenefit: 'Test benefit only. This is not a verified commercial offer.',
-    emptySearch: 'Enter a product name or SKU.', liveOnly: 'Live search is available after connecting to Supabase.', notFound: 'No matching product was found.',
-    noPrices: 'The product was found, but no active prices are available yet.', basePrice: 'Base price, no active benefit', activeBenefit: 'Active benefit',
-    demoUser: 'Demo user', languageButton: 'עברית', themeLight: 'Light mode', themeDark: 'Dark mode', logout: 'Log out'
+    search:'Search',wallet:'My Wallet',admin:'Admin',loading:'Loading...',loginTitle:'The price that fits you',loginText:'Compare prices and benefits based on your cards and clubs.',privacy:'No card number or CVV is required',signIn:'Sign in',createAccount:'Create account',email:'Email',password:'Password',login:'Sign in',register:'Sign up',noAccount:'No account? Sign up',haveAccount:'Already registered? Sign in',demo:'Open demo',missingConfig:'Supabase connection variables are missing.',signedIn:'Signed in successfully',confirmation:'A confirmation email was sent.',google:'Continue with Google',googleLoading:'Redirecting to Google...',or:'or',available:'Available',active:'Active',add:'Add',remove:'Remove',imagePending:'Image will be added from the source',products:'Products',stores:'Stores',benefits:'Benefits',adminTitle:'Admin Dashboard',adminText:'BENEFY status overview.',refresh:'Refresh',walletText:'Select your cards and clubs. BENEFY will calculate your personalized price.',activePrograms:'active programs',heroBadge:'Your personalized price comparison',heroLine1:'Find the deal that is truly',heroLine2:'best for you',placeholder:'For example: iPhone, IVIPH17PORESIM or phones',compare:'Compare prices',searching:'Searching...',startTitle:'Your personalized price starts here',startText:'Search for a product and get a price after your existing benefits.',noCategory:'Uncategorized',sku:'SKU',activeCards:'Active programs',foundPrices:'Prices we found',best:'Best personalized choice',source:'Price source in database',saving:'Savings',checkout:'Checkout price',shipping:'Shipping',free:'Free',total:'Effective total',storeButton:'Go to store',noLink:'No link',testBenefit:'Test benefit only. This is not a verified commercial offer.',emptySearch:'Enter a product name or SKU.',liveOnly:'Live search is available after connecting to Supabase.',notFound:'No matching product was found.',noPrices:'The product was found, but no active prices are available yet.',basePrice:'Base price, no active benefit',activeBenefit:'Active benefit',demoUser:'Demo user',languageButton:'עברית',themeLight:'Light mode',themeDark:'Dark mode',logout:'Log out'
   }
 };
