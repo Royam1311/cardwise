@@ -8,11 +8,12 @@ import './benefy-typography.css';
 import './benefy-header-v5.css';
 import './benefy-search-dark.css';
 import './benefy-header-tokens.css';
-import './benefy-auth-showcase-v6.css';
+import './benefy-auth-showcase-v7.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableBenefyTokens } from './benefyTokens';
 import { enableAuthShowcase } from './authShowcase';
+import { enableAuthControls } from './authControls';
 
 function Root() {
   useEffect(() => {
@@ -20,11 +21,13 @@ function Root() {
     const disableProfilePopover = enableProfilePopover();
     const disableBenefyTokens = enableBenefyTokens();
     const disableAuthShowcase = enableAuthShowcase();
+    const disableAuthControls = enableAuthControls();
     return () => {
       disableCompactHeader?.();
       disableProfilePopover?.();
       disableBenefyTokens?.();
       disableAuthShowcase?.();
+      disableAuthControls?.();
     };
   }, []);
 
