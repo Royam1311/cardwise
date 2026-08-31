@@ -1,16 +1,74 @@
-// Adds decorative BENEFY benefit cards to the authentication gateway.
-// Visual enhancement only. No authentication or application logic changes.
+// BENEFY authentication showcase cards.
+// Decorative only. No authentication, Supabase, pricing, or business logic changes.
 export function enableAuthShowcase() {
   let observer;
 
   const cards = [
-    { className: 'showcase-card--max', title: 'MAX', subtitle: 'הטבה מותאמת', icon: 'M' },
-    { className: 'showcase-card--haver', title: 'חבר', subtitle: 'מחיר אישי', icon: 'ח' },
-    { className: 'showcase-card--htz', title: 'הייטקזון', subtitle: 'מועדון הטבות', icon: 'H' },
-    { className: 'showcase-card--cashback', title: 'Cashback', subtitle: 'החזר מותאם', icon: '↙' },
-    { className: 'showcase-card--discount', title: 'הנחה אישית', subtitle: 'לפי הארנק שלך', icon: '%' },
-    { className: 'showcase-card--benefys', title: "Benefy's", subtitle: 'הטבות במקום אחד', icon: 'B' }
+    {
+      className: 'showcase-card--max',
+      brand: 'MAX',
+      detail: 'הטבה מותאמת',
+      mark: 'M',
+      type: 'credit'
+    },
+    {
+      className: 'showcase-card--haver',
+      brand: 'חבר',
+      detail: 'מחיר אישי',
+      mark: 'ח',
+      type: 'credit'
+    },
+    {
+      className: 'showcase-card--htz',
+      brand: 'הייטקזון',
+      detail: 'מועדון הטבות',
+      mark: 'H',
+      type: 'credit'
+    },
+    {
+      className: 'showcase-card--isracard',
+      brand: 'ישראכרט',
+      detail: 'הטבה חכמה',
+      mark: 'I',
+      type: 'credit'
+    },
+    {
+      className: 'showcase-card--discount',
+      brand: '12%',
+      detail: 'דוגמת הנחה',
+      mark: '%',
+      type: 'offer'
+    },
+    {
+      className: 'showcase-card--cashback',
+      brand: 'Cashback',
+      detail: 'דוגמת החזר עד 10%',
+      mark: '↙',
+      type: 'offer'
+    },
+    {
+      className: 'showcase-card--benefys',
+      brand: "Benefy's",
+      detail: 'הטבות במקום אחד',
+      mark: 'B',
+      type: 'offer'
+    },
+    {
+      className: 'showcase-card--best',
+      brand: 'המחיר שלך',
+      detail: 'אחרי כל ההטבות',
+      mark: '✓',
+      type: 'offer'
+    }
   ];
+
+  function createChip() {
+    return `
+      <span class="auth-showcase__chip" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </span>
+    `;
+  }
 
   function enhance() {
     const auth = document.querySelector('.auth');
@@ -22,14 +80,34 @@ export function enableAuthShowcase() {
 
     cards.forEach(card => {
       const item = document.createElement('div');
-      item.className = `auth-showcase__card ${card.className}`;
-      item.innerHTML = `
-        <span class="auth-showcase__icon">${card.icon}</span>
-        <span class="auth-showcase__copy">
-          <strong>${card.title}</strong>
-          <small>${card.subtitle}</small>
-        </span>
-      `;
+      item.className = `auth-showcase__card ${card.className} auth-showcase__card--${card.type}`;
+
+      if (card.type === 'credit') {
+        item.innerHTML = `
+          <span class="auth-showcase__credit-top">
+            <strong>${card.brand}</strong>
+            <span class="auth-showcase__mark">${card.mark}</span>
+          </span>
+          <span class="auth-showcase__credit-middle">
+            ${createChip()}
+            <span class="auth-showcase__contactless">)))</span>
+          </span>
+          <span class="auth-showcase__credit-bottom">
+            <small>${card.detail}</small>
+            <b>•••• BENEFITS</b>
+          </span>
+        `;
+      } else {
+        item.innerHTML = `
+          <span class="auth-showcase__offer-icon">${card.mark}</span>
+          <span class="auth-showcase__offer-copy">
+            <strong>${card.brand}</strong>
+            <small>${card.detail}</small>
+          </span>
+          <span class="auth-showcase__example">דוגמה</span>
+        `;
+      }
+
       showcase.appendChild(item);
     });
 
