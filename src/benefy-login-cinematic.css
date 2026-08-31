@@ -1,0 +1,61 @@
+/* LOGIN TEST V1 */
+
+.auth {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.auth::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-image: url('/benefy-login-scene.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    z-index: 0;
+}
+
+.auth::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            rgba(4,10,25,0.55),
+            rgba(4,10,25,0.75)
+        );
+
+    z-index: 1;
+}
+
+.brand-panel {
+    display: none;
+}
+
+.auth-card {
+    position: relative;
+    z-index: 2;
+
+    backdrop-filter: blur(14px);
+    background: rgba(15,25,45,0.45);
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+      0 20px 80px rgba(0,0,0,0.4);
+
+    color: white;
+}
+
+.auth-card input {
+    background: rgba(255,255,255,0.08);
+}
+
+.auth-card h2 {
+    color: white;
+}
