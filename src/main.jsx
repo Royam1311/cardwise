@@ -8,7 +8,7 @@ import './benefy-typography.css';
 import './benefy-header-v5.css';
 import './benefy-search-dark.css';
 import './benefy-header-tokens.css';
-import './benefy-auth-showcase-v7.css';
+import './benefy-auth-showcase-v8.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableBenefyTokens } from './benefyTokens';
