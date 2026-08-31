@@ -53,48 +53,167 @@ function Auth({ onDemo, t }) {
   const [googleBusy, setGoogleBusy] = useState(false);
 
   async function submit(event) {
-    event.preventDefault(); setMsg('');
-    if (!configured) return setMsg(t.missingConfig);
+    event.preventDefault();
+    setMsg('');
+
+    if (!configured) {
+      setMsg(t.missingConfig);
+      return;
+    }
+
     setBusy(true);
+
     const { error } = mode === 'login'
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+      ? await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+      : await supabase.auth.signUp({
+          email,
+          password
+        });
+
     setBusy(false);
-    setMsg(error ? error.message : mode === 'login' ? t.signedIn : t.confirmation);
+
+    setMsg(
+      error
+        ? error.message
+        : mode === 'login'
+          ? t.signedIn
+          : t.confirmation
+    );
   }
 
   async function google() {
     setMsg('');
-    if (!configured) return setMsg(t.missingConfig);
+
+    if (!configured) {
+      setMsg(t.missingConfig);
+      return;
+    }
+
     setGoogleBusy(true);
+
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google', options: { redirectTo: window.location.origin }
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
     });
-    if (error) { setMsg(error.message); setGoogleBusy(false); }
+
+    if (error) {
+      setMsg(error.message);
+      setGoogleBusy(false);
+    }
   }
 
   return (
-    <main className="auth">
-      <section className="brand-panel">
-        <AdaptiveLogo className="site-logo--auth" />
-        <h1>{t.loginTitle}</h1><p>{t.loginText}</p>
-        <div className="feature"><ShieldCheck /> {t.privacy}</div>
-      </section>
-      <section className="auth-card">
-        <h2>{mode === 'login' ? t.signIn : t.createAccount}</h2>
-        <button type="button" className="google-login-button" onClick={google} disabled={googleBusy || busy}>
-          <GoogleMark /><span>{googleBusy ? t.googleLoading : t.google}</span>
-        </button>
-        <div className="auth-divider"><span>{t.or}</span></div>
-        <form onSubmit={submit}>
-          <label>{t.email}<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
-          <label>{t.password}<input type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} required /></label>
-          <button className="primary" disabled={busy || googleBusy}>{busy ? t.loading : mode === 'login' ? t.login : t.register}</button>
-        </form>
-        {msg && <div className="notice">{msg}</div>}
-        <button className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? t.noAccount : t.haveAccount}</button>
-        <button className="demo" onClick={onDemo}>{t.demo}</button>
-      </section>
+    <main className="cinematic-auth">
+      <div className="cinematic-stage">
+        /benefy-login-start.webp
+
+        /benefy-login-end.webp
+
+        <div className="cinematic-screen">
+          <section className="auth-card cinematic-auth-card">
+            <AdaptiveLogo className="cinematic-auth-logo" />
+
+            <h2>
+              {mode === 'login' ? t.signIn : t.createAccount}
+            </h2>
+
+            <button
+              type="button"
+              className="google-login-button"
+              onClick={google}
+              disabled={googleBusy || busy}
+            >
+              <GoogleMark />
+
+              <span>
+                {googleBusy ? t.googleLoading : t.google}
+              </span>
+            </button>
+
+            <div className="auth-divider">
+              <span>{t.or}</span>
+            </div>
+
+            <form onSubmit={submit}>
+              <label>
+                <span>{t.email}</span>
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={event => setEmail(event.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </label>
+
+              <label>
+                <span>{t.password}</span>
+
+                <input
+                  type="password"
+                  minLength="6"
+                  value={password}
+                  onChange={event => setPassword(event.target.value)}
+                  required
+                  autoComplete={
+                    mode === 'login'
+                      ? 'current-password'
+                      : 'new-password'
+                  }
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="primary"
+                disabled={busy || googleBusy}
+              >
+                {busy
+                  ? t.loading
+                  : mode === 'login'
+                    ? t.login
+                    : t.register}
+              </button>
+            </form>
+
+            {msg && (
+              <div className="notice" role="status">
+                {msg}
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                setMode(currentMode =>
+                  currentMode === 'login'
+                    ? 'register'
+                    : 'login'
+                );
+
+                setMsg('');
+              }}
+            >
+              {mode === 'login' ? t.noAccount : t.haveAccount}
+            </button>
+
+            <button
+              type="button"
+              className="demo"
+              onClick={onDemo}
+            >
+              {t.demo}
+            </button>
+          </section>
+        </div>
+      </div>
     </main>
   );
 }
