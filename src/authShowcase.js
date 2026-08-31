@@ -1,17 +1,15 @@
-// BENEFY authentication showcase v4.
+// BENEFY authentication showcase v5.
 // Decorative only. No authentication, Supabase, pricing, or business logic changes.
 export function enableAuthShowcase() {
   let observer;
 
   const cards = [
-    { className: 'showcase-card--max', brand: 'MAX', detail: 'הטבה מותאמת', mark: 'M', type: 'credit' },
-    { className: 'showcase-card--haver', brand: 'חבר', detail: 'מחיר אישי', mark: 'ח', type: 'credit' },
-    { className: 'showcase-card--htz', brand: 'הייטקזון', detail: 'מועדון הטבות', mark: 'H', type: 'credit' },
-    { className: 'showcase-card--isracard', brand: 'ישראכרט', detail: 'הטבה חכמה', mark: 'I', type: 'credit' },
-    { className: 'showcase-card--discount', brand: '12%', detail: 'דוגמת הנחה', mark: '%', type: 'offer' },
-    { className: 'showcase-card--cashback', brand: 'Cashback', detail: 'דוגמת החזר עד 10%', mark: '↙', type: 'offer' },
-    { className: 'showcase-card--benefys', brand: "Benefy's", detail: 'הטבות במקום אחד', mark: 'B', type: 'offer' },
-    { className: 'showcase-card--best', brand: 'המחיר שלך', detail: 'אחרי כל ההטבות', mark: '✓', type: 'offer' }
+    { className: 'showcase-card--max', brand: 'MAX', detail: 'הטבה מותאמת', mark: 'M' },
+    { className: 'showcase-card--haver', brand: 'חבר', detail: 'מחיר אישי', mark: 'ח' },
+    { className: 'showcase-card--htz', brand: 'הייטקזון', detail: 'מועדון הטבות', mark: 'H' },
+    { className: 'showcase-card--isracard', brand: 'ישראכרט', detail: 'הטבה חכמה', mark: 'I' },
+    { className: 'showcase-card--ashmoret', brand: 'אשמורת', detail: 'הטבות לחברי המועדון', mark: 'א' },
+    { className: 'showcase-card--behatsdaa', brand: 'בהצדעה', detail: 'הטבות לחברי המועדון', mark: 'ב' }
   ];
 
   const percentages = ['8%', '10%', '12%', '15%', '18%', '20%', '25%', '30%', '7%', '22%', '14%', '9%', '16%', '11%', '28%', '5%', '17%', '24%'];
@@ -27,6 +25,7 @@ export function enableAuthShowcase() {
     const saleCloud = document.createElement('div');
     saleCloud.className = 'auth-sale-cloud';
     saleCloud.setAttribute('aria-hidden', 'true');
+
     percentages.forEach((value, index) => {
       const item = document.createElement('span');
       item.className = `auth-sale-cloud__item auth-sale-cloud__item--${index + 1}`;
@@ -40,20 +39,21 @@ export function enableAuthShowcase() {
 
     cards.forEach(card => {
       const item = document.createElement('div');
-      item.className = `auth-showcase__card ${card.className} auth-showcase__card--${card.type}`;
-      if (card.type === 'credit') {
-        item.innerHTML = `
-          <span class="auth-showcase__credit-top"><strong>${card.brand}</strong><span class="auth-showcase__mark">${card.mark}</span></span>
-          <span class="auth-showcase__credit-middle">${chipMarkup()}<span class="auth-showcase__contactless">)))</span></span>
-          <span class="auth-showcase__credit-bottom"><small>${card.detail}</small><b>•••• BENEFITS</b></span>
-        `;
-      } else {
-        item.innerHTML = `
-          <span class="auth-showcase__offer-icon">${card.mark}</span>
-          <span class="auth-showcase__offer-copy"><strong>${card.brand}</strong><small>${card.detail}</small></span>
-          <span class="auth-showcase__example">דוגמה</span>
-        `;
-      }
+      item.className = `auth-showcase__card auth-showcase__card--credit ${card.className}`;
+      item.innerHTML = `
+        <span class="auth-showcase__credit-top">
+          <strong>${card.brand}</strong>
+          <span class="auth-showcase__mark">${card.mark}</span>
+        </span>
+        <span class="auth-showcase__credit-middle">
+          ${chipMarkup()}
+          <span class="auth-showcase__contactless">)))</span>
+        </span>
+        <span class="auth-showcase__credit-bottom">
+          <small>${card.detail}</small>
+          <b>•••• BENEFITS</b>
+        </span>
+      `;
       showcase.appendChild(item);
     });
 
@@ -63,5 +63,6 @@ export function enableAuthShowcase() {
   enhance();
   observer = new MutationObserver(enhance);
   observer.observe(document.body, { childList: true, subtree: true });
+
   return () => observer?.disconnect();
 }
