@@ -8,20 +8,23 @@ import './benefy-typography.css';
 import './benefy-header-v5.css';
 import './benefy-search-dark.css';
 import './benefy-header-tokens.css';
-import './benefy-auth-gateway.css';
+import './benefy-auth-showcase.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableBenefyTokens } from './benefyTokens';
+import { enableAuthShowcase } from './authShowcase';
 
 function Root() {
   useEffect(() => {
     const disableCompactHeader = enableCompactHeader();
     const disableProfilePopover = enableProfilePopover();
     const disableBenefyTokens = enableBenefyTokens();
+    const disableAuthShowcase = enableAuthShowcase();
     return () => {
       disableCompactHeader?.();
       disableProfilePopover?.();
       disableBenefyTokens?.();
+      disableAuthShowcase?.();
     };
   }, []);
 
