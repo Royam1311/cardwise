@@ -1,6 +1,6 @@
 // Enhances the existing React-managed user area with a profile popover.
-// The original React logout button remains connected to the DOM so its
-// onClick handler continues to work for both Supabase sessions and demo mode.
+// The original React logout button remains connected so its onClick handler
+// continues to work for both Supabase sessions and demo mode.
 export function enableProfilePopover() {
   let observer;
   let activeCleanup = null;
@@ -8,15 +8,10 @@ export function enableProfilePopover() {
   function enhance() {
     const user = document.querySelector('.topbar .user');
 
-    if (!user || user.dataset.profileEnhanced === 'true') {
-      return;
-    }
+    if (!user || user.dataset.profileEnhanced === 'true') return;
 
     const originalLogout = user.querySelector('button');
-
-    if (!originalLogout) {
-      return;
-    }
+    if (!originalLogout) return;
 
     user.dataset.profileEnhanced = 'true';
 
@@ -31,21 +26,23 @@ export function enableProfilePopover() {
       ? originalUserIcon.outerHTML
       : '<span aria-hidden="true">&#128100;</span>';
 
-    // Keep the original React button mounted and connected. Hiding it visually
-    // preserves the delegated React click handler used by App.jsx.
     Array.from(user.childNodes).forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        node.textContent = '';
-      }
+      if (node.nodeType === Node.TEXT_NODE) node.textContent = '';
     });
 
+    // Keep React-managed elements connected, but force them to be visually
+    // hidden. The !important flag prevents global SVG/button CSS rules from
+    // making the original inactive user icon visible beside the new trigger.
     if (originalUserIcon) {
       originalUserIcon.hidden = true;
+      originalUserIcon.setAttribute('aria-hidden', 'true');
+      originalUserIcon.style.setProperty('display', 'none', 'important');
     }
 
     originalLogout.hidden = true;
     originalLogout.tabIndex = -1;
     originalLogout.setAttribute('aria-hidden', 'true');
+    originalLogout.style.setProperty('display', 'none', 'important');
 
     const trigger = document.createElement('button');
     trigger.type = 'button';
@@ -108,16 +105,11 @@ export function enableProfilePopover() {
       event.preventDefault();
       event.stopPropagation();
       setOpen(false);
-
-      // The original button is still inside the live React tree, so this click
-      // reaches the onClick handler defined in App.jsx.
       originalLogout.click();
     }
 
     function onOutsideClick(event) {
-      if (!user.contains(event.target)) {
-        setOpen(false);
-      }
+      if (!user.contains(event.target)) setOpen(false);
     }
 
     function onKeyDown(event) {
@@ -144,7 +136,6 @@ export function enableProfilePopover() {
 
   observer = new MutationObserver(() => {
     const enhancedUser = document.querySelector('.topbar .user[data-profile-enhanced="true"]');
-
     if (!enhancedUser) {
       activeCleanup?.();
       activeCleanup = null;
@@ -152,10 +143,7 @@ export function enableProfilePopover() {
     }
   });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  observer.observe(document.body, { childList: true, subtree: true });
 
   return () => {
     observer?.disconnect();
