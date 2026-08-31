@@ -1,0 +1,411 @@
+/* BENEFY Auth Showcase v2
+   Inspired by floating benefit cards, without a device mockup.
+   Login remains centered, with a large logo above it. */
+
+.auth {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 150px 26px 64px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(140,191,247,.14), transparent 26%),
+    radial-gradient(circle at 14% 18%, rgba(107,151,201,.07), transparent 26%),
+    radial-gradient(circle at 88% 72%, rgba(140,191,247,.08), transparent 24%),
+    linear-gradient(145deg, #17191c 0%, #101113 58%, #0d0f11 100%);
+}
+
+.auth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(207,231,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(207,231,255,.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  opacity: .38;
+  mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 78%);
+}
+
+.auth::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  width: min(720px, 70vw);
+  height: min(720px, 70vw);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(140,191,247,.09), transparent 68%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+/* The brand panel becomes the logo anchor above the login card. */
+.brand-panel {
+  position: absolute;
+  top: 38px;
+  left: 50%;
+  z-index: 5;
+  display: block;
+  width: min(520px, calc(100% - 36px));
+  min-height: 90px;
+  padding: 0;
+  overflow: visible;
+  transform: translateX(-50%);
+  background: transparent !important;
+  text-align: center;
+}
+
+.brand-panel::before,
+.brand-panel::after,
+.brand-panel h1,
+.brand-panel p,
+.brand-panel .feature {
+  display: none !important;
+}
+
+.brand-panel .site-logo--auth {
+  position: relative;
+  display: block;
+  width: min(470px, 90vw);
+  height: 112px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.brand-panel .site-logo--auth .site-logo__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.34);
+  transform-origin: center;
+  filter:
+    drop-shadow(0 20px 38px rgba(0,0,0,.38))
+    drop-shadow(0 0 22px rgba(140,191,247,.10));
+}
+
+/* Login card at the center */
+.auth-card {
+  position: relative;
+  z-index: 6;
+  width: min(470px, calc(100% - 32px));
+  margin: 0;
+  padding: 36px;
+  border: 1px solid rgba(207,231,255,.14);
+  border-radius: 30px;
+  color: #f2f5f7;
+  background:
+    linear-gradient(145deg, rgba(31,35,40,.94), rgba(20,23,27,.96));
+  box-shadow:
+    0 38px 100px rgba(0,0,0,.48),
+    0 0 0 1px rgba(140,191,247,.025),
+    inset 0 1px rgba(255,255,255,.055);
+  backdrop-filter: blur(24px) saturate(125%);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+}
+
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(140,191,247,.11), transparent 38%);
+}
+
+.auth-card h2 {
+  color: #f4f7fa;
+  text-align: center;
+}
+
+.auth-card label {
+  color: #d9dfe5;
+}
+
+.auth-card input {
+  color: #f2f5f7;
+  border-color: rgba(207,231,255,.12);
+  background: rgba(8,13,18,.38);
+}
+
+.auth-card input:focus {
+  border-color: rgba(140,191,247,.55);
+  background: rgba(12,18,24,.58);
+  box-shadow: 0 0 0 4px rgba(140,191,247,.08);
+}
+
+.google-login-button {
+  color: #172231;
+  border-color: rgba(207,231,255,.24);
+  background: #f8fbff;
+}
+
+.google-login-button:hover {
+  color: #172231;
+  background: #eaf5ff;
+}
+
+.auth-divider {
+  color: #8d98a3;
+}
+
+.auth-card .demo {
+  color: #dce4ec;
+  border-color: rgba(207,231,255,.13);
+}
+
+.auth-card .demo:hover {
+  background: rgba(140,191,247,.08);
+}
+
+/* Floating benefit cards around the entrance */
+.auth-showcase {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.auth-showcase__card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 190px;
+  min-height: 76px;
+  padding: 13px 16px;
+  border: 1px solid rgba(207,231,255,.13);
+  border-radius: 22px;
+  color: #edf4fa;
+  background:
+    linear-gradient(145deg, rgba(33,38,44,.83), rgba(18,22,27,.9));
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.40),
+    inset 0 1px rgba(255,255,255,.045);
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  animation: benefitFloat 7s ease-in-out infinite;
+}
+
+.auth-showcase__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border: 1px solid rgba(207,231,255,.13);
+  border-radius: 15px;
+  color: #cfe7ff;
+  background: rgba(140,191,247,.09);
+  font-family: Inter, Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 850;
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+}
+
+.auth-showcase__copy {
+  display: grid;
+  gap: 3px;
+  text-align: start;
+}
+
+.auth-showcase__copy strong {
+  font-size: 17px;
+  font-weight: 760;
+  line-height: 1.1;
+}
+
+.auth-showcase__copy small {
+  color: #9eabb7;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.showcase-card--max {
+  top: 17%;
+  left: 5%;
+  transform: rotate(-5deg);
+}
+
+.showcase-card--haver {
+  top: 13%;
+  right: 5%;
+  transform: rotate(5deg);
+  animation-delay: -1.5s;
+}
+
+.showcase-card--htz {
+  bottom: 14%;
+  left: 7%;
+  transform: rotate(4deg);
+  animation-delay: -3s;
+}
+
+.showcase-card--cashback {
+  bottom: 16%;
+  right: 6%;
+  transform: rotate(-4deg);
+  animation-delay: -4.2s;
+}
+
+.showcase-card--discount {
+  top: 43%;
+  left: 2.5%;
+  min-width: 170px;
+  transform: rotate(3deg);
+  animation-delay: -2.3s;
+}
+
+.showcase-card--benefys {
+  top: 44%;
+  right: 2.5%;
+  min-width: 180px;
+  transform: rotate(-3deg);
+  animation-delay: -5.1s;
+}
+
+.showcase-card--max .auth-showcase__icon { color: #b9d8ff; background: rgba(92,139,207,.14); }
+.showcase-card--haver .auth-showcase__icon { color: #d9eaff; background: rgba(112,157,201,.13); }
+.showcase-card--htz .auth-showcase__icon { color: #bddcff; background: rgba(83,133,191,.15); }
+.showcase-card--cashback .auth-showcase__icon { color: #cae6ff; }
+.showcase-card--discount .auth-showcase__icon { color: #e4f2ff; font-size: 24px; }
+.showcase-card--benefys .auth-showcase__icon { color: #cfe7ff; }
+
+@keyframes benefitFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -12px; }
+}
+
+/* Light mode uses the same brand palette with white surfaces. */
+:root[data-theme="light"] .auth {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(121,184,242,.17), transparent 28%),
+    radial-gradient(circle at 12% 18%, rgba(121,184,242,.08), transparent 25%),
+    linear-gradient(145deg, #edf4fb 0%, #f8fbff 55%, #eef4fa 100%);
+}
+
+:root[data-theme="light"] .auth-card {
+  color: #121820;
+  border-color: rgba(62,143,216,.14);
+  background: rgba(255,255,255,.93);
+  box-shadow:
+    0 34px 90px rgba(34,67,100,.18),
+    inset 0 1px rgba(255,255,255,.96);
+}
+
+:root[data-theme="light"] .auth-card h2,
+:root[data-theme="light"] .auth-card label,
+:root[data-theme="light"] .auth-card .demo {
+  color: #121820;
+}
+
+:root[data-theme="light"] .auth-card input {
+  color: #172231;
+  border-color: rgba(42,76,110,.13);
+  background: #f7fafe;
+}
+
+:root[data-theme="light"] .auth-showcase__card {
+  color: #18222d;
+  border-color: rgba(62,143,216,.13);
+  background: rgba(255,255,255,.82);
+  box-shadow:
+    0 22px 60px rgba(35,68,101,.14),
+    inset 0 1px rgba(255,255,255,.95);
+}
+
+:root[data-theme="light"] .auth-showcase__copy small {
+  color: #697887;
+}
+
+:root[data-theme="light"] .auth-showcase__icon {
+  color: #3f8ed5;
+  border-color: rgba(62,143,216,.13);
+  background: rgba(140,191,247,.13);
+}
+
+@media (max-width: 1180px) {
+  .auth-showcase__card {
+    min-width: 160px;
+    padding: 11px 13px;
+  }
+
+  .showcase-card--discount,
+  .showcase-card--benefys {
+    display: none;
+  }
+
+  .showcase-card--max,
+  .showcase-card--htz {
+    left: 2%;
+  }
+
+  .showcase-card--haver,
+  .showcase-card--cashback {
+    right: 2%;
+  }
+}
+
+@media (max-width: 880px) {
+  .auth {
+    padding: 138px 16px 48px;
+    overflow-y: auto;
+  }
+
+  .brand-panel {
+    top: 24px;
+  }
+
+  .brand-panel .site-logo--auth {
+    width: min(390px, 88vw);
+    height: 98px;
+  }
+
+  .auth-card {
+    width: min(500px, calc(100% - 20px));
+    padding: 30px;
+  }
+
+  .auth-showcase__card {
+    opacity: .42;
+  }
+
+  .showcase-card--max { top: 22%; left: -70px; }
+  .showcase-card--haver { top: 19%; right: -75px; }
+  .showcase-card--htz { bottom: 8%; left: -80px; }
+  .showcase-card--cashback { bottom: 9%; right: -82px; }
+}
+
+@media (max-width: 620px) {
+  .auth {
+    padding-top: 122px;
+  }
+
+  .brand-panel .site-logo--auth {
+    width: min(320px, 84vw);
+    height: 82px;
+  }
+
+  .auth-card {
+    padding: 26px 20px;
+    border-radius: 26px;
+  }
+
+  .auth-showcase__card {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-showcase__card {
+    animation: none;
+  }
+}
