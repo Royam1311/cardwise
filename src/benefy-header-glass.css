@@ -1,0 +1,91 @@
+/* BENEFY floating-header glass refinement
+   Loaded after benefy-header-scroll-shell.css. */
+
+/* Keep the top-of-page header completely integrated into the page. */
+.topbar:not(.is-compact) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* On scroll, create a translucent glass capsule.
+   The blur preserves context while preventing text behind the header from becoming noisy. */
+.topbar.is-compact {
+  border-color: rgba(207, 231, 255, .13) !important;
+  background: rgba(19, 22, 26, .64) !important;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, .31),
+    0 8px 24px rgba(15, 35, 53, .18),
+    inset 0 1px rgba(255, 255, 255, .055) !important;
+  backdrop-filter: blur(26px) saturate(132%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(132%) !important;
+}
+
+/* Slightly brighter glass in Light Mode. */
+:root[data-theme="light"] .topbar.is-compact {
+  border-color: rgba(70, 105, 137, .13) !important;
+  background: rgba(248, 251, 255, .66) !important;
+  box-shadow:
+    0 24px 64px rgba(34, 66, 98, .16),
+    0 8px 28px rgba(82, 148, 211, .10),
+    inset 0 1px rgba(255, 255, 255, .86) !important;
+  backdrop-filter: blur(25px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(125%) !important;
+}
+
+/* Preserve separation of the inner navigation without making it opaque. */
+.topbar.is-compact > .nav-3d {
+  border-color: rgba(207, 231, 255, .10) !important;
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .025) !important;
+}
+
+:root[data-theme="light"] .topbar.is-compact > .nav-3d {
+  border-color: rgba(70, 105, 137, .10) !important;
+  background: rgba(255, 255, 255, .24) !important;
+}
+
+/* Add a soft lower shadow gradient so the capsule feels elevated, not outlined. */
+.topbar.is-compact::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 8%;
+  right: 8%;
+  bottom: -18px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .20);
+  filter: blur(18px);
+  pointer-events: none;
+  opacity: .52;
+}
+
+:root[data-theme="light"] .topbar.is-compact::after {
+  background: rgba(47, 92, 132, .15);
+  opacity: .44;
+}
+
+@media (max-width: 760px) {
+  .topbar.is-compact {
+    background: rgba(19, 22, 26, .72) !important;
+  }
+
+  :root[data-theme="light"] .topbar.is-compact {
+    background: rgba(248, 251, 255, .74) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .topbar.is-compact {
+    background: #1b1e22 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  :root[data-theme="light"] .topbar.is-compact {
+    background: #f8fbff !important;
+  }
+}
