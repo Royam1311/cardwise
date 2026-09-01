@@ -6,6 +6,7 @@ import './benefy-luxury.css';
 import './benefy-blue-theme.css';
 import './benefy-typography.css';
 import './benefy-header-v5.css';
+import './benefy-header-scroll-shell.css';
 import './benefy-search-dark.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
