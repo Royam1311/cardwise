@@ -1,0 +1,39 @@
+/* BENEFY footer spacing
+   Keeps the footer below the initial search viewport so users reach it by scrolling. */
+
+/* Desktop and large laptop screens */
+.benefy-footer {
+  margin-top: clamp(240px, 30vh, 380px) !important;
+}
+
+/* When actual product results are displayed, keep a comfortable separation
+   without creating an excessively long empty area. */
+.results-premium:has(.product-card) + .benefy-footer {
+  margin-top: clamp(120px, 16vh, 220px) !important;
+}
+
+/* Medium screens */
+@media (max-width: 1100px) {
+  .benefy-footer {
+    margin-top: clamp(190px, 25vh, 300px) !important;
+  }
+
+  .results-premium:has(.product-card) + .benefy-footer {
+    margin-top: clamp(100px, 14vh, 180px) !important;
+  }
+}
+
+/* Mobile screens already require vertical scrolling, so use a smaller gap. */
+@media (max-width: 760px) {
+  .benefy-footer,
+  .results-premium:has(.product-card) + .benefy-footer {
+    margin-top: 120px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .benefy-footer,
+  .results-premium:has(.product-card) + .benefy-footer {
+    margin-top: 90px !important;
+  }
+}
