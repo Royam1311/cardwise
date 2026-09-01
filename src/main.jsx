@@ -10,12 +10,14 @@ import './benefy-search-dark.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
+import './benefy-wallet-experience.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
+import { enableWalletExperience } from './walletExperience';
 
 function Root() {
   useEffect(() => {
@@ -25,6 +27,7 @@ function Root() {
     const disableAuthControls = enableAuthControls();
     const disableNavFeatures = enableNavFeatures();
     const disableNavIndicator = enableNavIndicator();
+    const disableWalletExperience = enableWalletExperience();
 
     return () => {
       disableCompactHeader?.();
@@ -33,6 +36,7 @@ function Root() {
       disableAuthControls?.();
       disableNavFeatures?.();
       disableNavIndicator?.();
+      disableWalletExperience?.();
     };
   }, []);
 
