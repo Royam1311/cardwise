@@ -21,30 +21,15 @@ import { enableWalletExperience } from './walletExperience';
 
 function Root() {
   useEffect(() => {
-    const disableCompactHeader = enableCompactHeader();
-    const disableProfilePopover = enableProfilePopover();
-    const disableAuthShowcase = enableAuthShowcase();
-    const disableAuthControls = enableAuthControls();
-    const disableNavFeatures = enableNavFeatures();
-    const disableNavIndicator = enableNavIndicator();
-    const disableWalletExperience = enableWalletExperience();
-
-    return () => {
-      disableCompactHeader?.();
-      disableProfilePopover?.();
-      disableAuthShowcase?.();
-      disableAuthControls?.();
-      disableNavFeatures?.();
-      disableNavIndicator?.();
-      disableWalletExperience?.();
-    };
+    const cleanups = [
+      enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
+      enableAuthControls(), enableNavFeatures(), enableNavIndicator(), enableWalletExperience()
+    ];
+    return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
-
   return <App />;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
+  <React.StrictMode><Root /></React.StrictMode>
 );
