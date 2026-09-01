@@ -1,157 +1,137 @@
-// BENEFY Wallet Experience
-// Shows only selected cards in the wallet and opens all available cards in a polished picker.
-// Existing App.jsx toggle logic and Supabase persistence remain the source of truth.
+// BENEFY Wallet Experience v2
+// Reliable selected-only wallet using the existing App.jsx card buttons as the data/action source.
 export function enableWalletExperience() {
   let observer;
+  let intervalId;
   let refreshTimer;
 
-  const isEnglish = () => document.documentElement.lang === 'en';
-  const text = () => isEnglish() ? {
-    add: 'Add cards', title: 'Add cards to your wallet', subtitle: 'Select the cards and benefit clubs you actually use.',
-    close: 'Close', selected: 'In wallet', available: 'Add', empty: 'Your wallet is empty', emptyText: 'Add cards to calculate your personalized price.'
+  const getLabels = () => document.documentElement.lang === 'en' ? {
+    add: 'Add cards', helper: 'Choose the cards and benefit clubs you use.',
+    title: 'Add cards to your wallet', subtitle: 'Tap a card to add or remove it.',
+    close: 'Close', selected: 'In wallet', available: 'Add'
   } : {
-    add: 'הוסף כרטיסים', title: 'הוספת כרטיסים לארנק', subtitle: 'בחר את הכרטיסים ומועדוני ההטבות שבהם אתה באמת משתמש.',
-    close: 'סגור', selected: 'בארנק', available: 'הוסף', empty: 'הארנק שלך עדיין ריק', emptyText: 'הוסף כרטיסים כדי לחשב את המחיר האישי שלך.'
+    add: 'הוסף כרטיסים', helper: 'בחר את הכרטיסים ומועדוני ההטבות שבהם אתה משתמש.',
+    title: 'הוספת כרטיסים לארנק', subtitle: 'לחץ על כרטיס כדי להוסיף או להסיר אותו.',
+    close: 'סגור', selected: 'בארנק', available: 'הוסף'
   };
 
-  function cardInfo(card) {
-    return {
-      selected: card.classList.contains('is-selected'),
-      name: card.querySelector('.wallet-card__brand strong')?.textContent?.trim() || '',
-      subtitle: card.querySelector('.wallet-card__brand small')?.textContent?.trim() || '',
-      className: [...card.classList].find(name => name.startsWith('wallet-card--')) || 'wallet-card--default'
-    };
-  }
+  const getGrid = () => document.querySelector('.wallet-grid');
+  const getCards = () => [...(getGrid()?.querySelectorAll('.wallet-card') || [])];
+  const isSelected = card => card.classList.contains('is-selected');
 
-  function createAddTile() {
-    const labels = text();
+  function makeAddTile() {
+    const labels = getLabels();
     const tile = document.createElement('button');
     tile.type = 'button';
     tile.className = 'wallet-add-card';
     tile.innerHTML = `
       <span class="wallet-add-card__art" aria-hidden="true">
         <span class="wallet-add-card__plus">+</span>
-        <span class="wallet-add-card__line"></span>
-        <span class="wallet-add-card__line wallet-add-card__line--short"></span>
+        <i></i><i></i>
       </span>
-      <span class="wallet-add-card__copy">
-        <strong>${labels.add}</strong>
-        <small>${labels.emptyText}</small>
-      </span>
+      <span class="wallet-add-card__copy"><strong>${labels.add}</strong><small>${labels.helper}</small></span>
     `;
     tile.addEventListener('click', openPicker);
     return tile;
   }
 
-  function buildPickerCard(sourceCard) {
-    const labels = text();
-    const info = cardInfo(sourceCard);
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = `wallet-picker-card ${info.className} ${info.selected ? 'is-selected' : ''}`;
-    item.innerHTML = `
-      <span class="wallet-picker-card__top">
-        <span class="wallet-picker-card__name"><strong></strong><small></small></span>
-        <span class="wallet-picker-card__state">${info.selected ? '✓ ' + labels.selected : '+ ' + labels.available}</span>
-      </span>
-      <span class="wallet-picker-card__chip" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span class="wallet-picker-card__bottom">BENEFY WALLET •••• BENEFITS</span>
-    `;
-    item.querySelector('strong').textContent = info.name;
-    item.querySelector('small').textContent = info.subtitle;
-    item.addEventListener('click', () => {
-      sourceCard.click();
-      item.classList.toggle('is-selected');
-      const nowSelected = item.classList.contains('is-selected');
-      item.querySelector('.wallet-picker-card__state').textContent = nowSelected ? '✓ ' + labels.selected : '+ ' + labels.available;
-      window.setTimeout(() => {
-        enhance();
-        rebuildPicker();
-      }, 450);
-    });
-    return item;
+  function cardData(card) {
+    return {
+      name: card.querySelector('.wallet-card__brand strong')?.textContent?.trim() || '',
+      subtitle: card.querySelector('.wallet-card__brand small')?.textContent?.trim() || '',
+      themeClass: [...card.classList].find(value => value.startsWith('wallet-card--')) || '',
+      selected: isSelected(card)
+    };
   }
 
-  function rebuildPicker() {
-    const modal = document.querySelector('.wallet-picker');
-    const originalGrid = document.querySelector('.wallet-grid');
-    if (!modal || !originalGrid) return;
-    const pickerGrid = modal.querySelector('.wallet-picker__grid');
-    pickerGrid.replaceChildren(...[...originalGrid.querySelectorAll(':scope > .wallet-card')].map(buildPickerCard));
+  function makePickerCard(sourceCard) {
+    const labels = getLabels();
+    const data = cardData(sourceCard);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `wallet-picker-card ${data.themeClass} ${data.selected ? 'is-selected' : ''}`;
+    card.innerHTML = `
+      <span class="wallet-picker-card__top"><span><strong></strong><small></small></span><b></b></span>
+      <span class="wallet-picker-card__middle"><span class="wallet-picker-card__chip"><i></i><i></i><i></i><i></i></span><em>)))</em></span>
+      <span class="wallet-picker-card__bottom">BENEFY WALLET •••• BENEFITS</span>
+    `;
+    card.querySelector('strong').textContent = data.name;
+    card.querySelector('small').textContent = data.subtitle;
+    card.querySelector('b').textContent = data.selected ? `✓ ${labels.selected}` : `+ ${labels.available}`;
+    card.addEventListener('click', () => {
+      sourceCard.click();
+      window.setTimeout(() => {
+        applyWalletView();
+        renderPickerCards();
+      }, 650);
+    });
+    return card;
+  }
+
+  function renderPickerCards() {
+    const pickerGrid = document.querySelector('.wallet-picker__grid');
+    if (!pickerGrid) return;
+    pickerGrid.replaceChildren(...getCards().map(makePickerCard));
+  }
+
+  function closePicker() {
+    const picker = document.querySelector('.wallet-picker');
+    if (!picker) return;
+    picker.classList.remove('is-open');
+    window.setTimeout(() => picker.remove(), 220);
   }
 
   function openPicker() {
     document.querySelector('.wallet-picker')?.remove();
-    const labels = text();
-    const originalGrid = document.querySelector('.wallet-grid');
-    if (!originalGrid) return;
-
-    const modal = document.createElement('div');
-    modal.className = 'wallet-picker';
-    modal.innerHTML = `
-      <div class="wallet-picker__backdrop"></div>
-      <section class="wallet-picker__panel" role="dialog" aria-modal="true" aria-labelledby="wallet-picker-title">
-        <header class="wallet-picker__header">
-          <div><span class="wallet-picker__eyebrow">BENEFY WALLET</span><h2 id="wallet-picker-title">${labels.title}</h2><p>${labels.subtitle}</p></div>
-          <button type="button" class="wallet-picker__close" aria-label="${labels.close}">×</button>
-        </header>
+    const labels = getLabels();
+    const picker = document.createElement('div');
+    picker.className = 'wallet-picker';
+    picker.innerHTML = `
+      <button class="wallet-picker__backdrop" type="button" aria-label="${labels.close}"></button>
+      <section class="wallet-picker__panel" role="dialog" aria-modal="true">
+        <header><div><span>BENEFY WALLET</span><h2>${labels.title}</h2><p>${labels.subtitle}</p></div><button class="wallet-picker__close" type="button" aria-label="${labels.close}">×</button></header>
         <div class="wallet-picker__grid"></div>
       </section>
     `;
-
-    const close = () => {
-      modal.classList.add('is-closing');
-      window.setTimeout(() => modal.remove(), 220);
-    };
-    modal.querySelector('.wallet-picker__backdrop').addEventListener('click', close);
-    modal.querySelector('.wallet-picker__close').addEventListener('click', close);
-    const escape = event => {
-      if (event.key === 'Escape') {
-        document.removeEventListener('keydown', escape);
-        close();
-      }
-    };
-    document.addEventListener('keydown', escape);
-    document.body.appendChild(modal);
-    rebuildPicker();
-    requestAnimationFrame(() => modal.classList.add('is-open'));
+    picker.querySelector('.wallet-picker__backdrop').addEventListener('click', closePicker);
+    picker.querySelector('.wallet-picker__close').addEventListener('click', closePicker);
+    document.body.appendChild(picker);
+    renderPickerCards();
+    requestAnimationFrame(() => picker.classList.add('is-open'));
   }
 
-  function enhance() {
-    const grid = document.querySelector('.wallet-grid');
+  function applyWalletView() {
+    const grid = getGrid();
     if (!grid) return;
-
-    const cards = [...grid.querySelectorAll(':scope > .wallet-card')];
+    const cards = getCards();
     if (!cards.length) return;
-    grid.classList.add('wallet-grid--owned-only');
 
-    cards.forEach(card => {
-      const selected = card.classList.contains('is-selected');
-      card.classList.toggle('wallet-card--owned', selected);
-      card.classList.toggle('wallet-card--catalog-only', !selected);
-    });
+    grid.dataset.selectedOnly = 'true';
+    cards.forEach(card => card.dataset.owned = isSelected(card) ? 'true' : 'false');
 
-    let addTile = grid.querySelector(':scope > .wallet-add-card');
-    if (!addTile) {
-      addTile = createAddTile();
-      grid.appendChild(addTile);
+    let tile = grid.querySelector('.wallet-add-card');
+    if (!tile) {
+      tile = makeAddTile();
+      grid.appendChild(tile);
     }
 
-    const selectedCount = cards.filter(card => card.classList.contains('is-selected')).length;
-    grid.classList.toggle('is-empty-wallet', selectedCount === 0);
+    const selectedCount = cards.filter(isSelected).length;
+    grid.dataset.empty = selectedCount === 0 ? 'true' : 'false';
   }
 
-  function scheduleEnhance() {
+  function schedule() {
     window.clearTimeout(refreshTimer);
-    refreshTimer = window.setTimeout(enhance, 40);
+    refreshTimer = window.setTimeout(applyWalletView, 30);
   }
 
-  enhance();
-  observer = new MutationObserver(scheduleEnhance);
+  applyWalletView();
+  observer = new MutationObserver(schedule);
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  intervalId = window.setInterval(applyWalletView, 500);
 
   return () => {
     observer?.disconnect();
+    window.clearInterval(intervalId);
     window.clearTimeout(refreshTimer);
     document.querySelector('.wallet-picker')?.remove();
   };
