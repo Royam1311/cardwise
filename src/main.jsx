@@ -12,7 +12,6 @@ import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
-import { enableBenefyTokens } from './benefyTokens';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableNavFeatures } from './navFeatures';
@@ -21,14 +20,12 @@ function Root() {
   useEffect(() => {
     const disableCompactHeader = enableCompactHeader();
     const disableProfilePopover = enableProfilePopover();
-    const disableBenefyTokens = enableBenefyTokens();
     const disableAuthShowcase = enableAuthShowcase();
     const disableAuthControls = enableAuthControls();
     const disableNavFeatures = enableNavFeatures();
     return () => {
       disableCompactHeader?.();
       disableProfilePopover?.();
-      disableBenefyTokens?.();
       disableAuthShowcase?.();
       disableAuthControls?.();
       disableNavFeatures?.();
