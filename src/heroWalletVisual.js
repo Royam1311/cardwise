@@ -1,13 +1,13 @@
-// Replaces the left-side demo benefits panel with a tilted wallet visual.
-// Presentation only. No card data, pricing, authentication, or Supabase logic changes.
+// BENEFY hero wallet visual v2.
+// Presentation only. No wallet data, pricing, authentication, or Supabase logic changes.
 export function enableHeroWalletVisual() {
   let observer;
 
   function enhance() {
     const panel = document.querySelector('.hero-benefits-card');
-    if (!panel || panel.dataset.walletVisual === 'true') return;
+    if (!panel || panel.dataset.walletVisual === 'v2') return;
 
-    panel.dataset.walletVisual = 'true';
+    panel.dataset.walletVisual = 'v2';
     panel.classList.add('hero-wallet-visual');
     panel.innerHTML = `
       <div class="hero-wallet-stack" aria-hidden="true">
@@ -25,11 +25,11 @@ export function enableHeroWalletVisual() {
         </article>
         <div class="hero-wallet-pocket">
           <span class="hero-wallet-pocket__shine"></span>
-          <div class="hero-wallet-pocket__brand">
-            <i>B</i>
-            <span><strong>BENEFY</strong><small>PERSONAL WALLET</small></span>
-          </div>
           <div class="hero-wallet-pocket__slot"></div>
+          <div class="hero-wallet-pocket__brand">
+            <strong>BENEFY</strong>
+            <small>PERSONAL WALLET</small>
+          </div>
         </div>
       </div>
     `;
