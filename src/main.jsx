@@ -11,6 +11,7 @@ import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
+import './benefy-footer.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
@@ -18,12 +19,14 @@ import { enableAuthControls } from './authControls';
 import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
+import { enableSiteFooter } from './siteFooter';
 
 function Root() {
   useEffect(() => {
     const cleanups = [
       enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
-      enableAuthControls(), enableNavFeatures(), enableNavIndicator(), enableWalletExperience()
+      enableAuthControls(), enableNavFeatures(), enableNavIndicator(),
+      enableWalletExperience(), enableSiteFooter()
     ];
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
