@@ -12,6 +12,7 @@ import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
 import './benefy-footer-v3.css';
+import './benefy-footer-spacing.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
@@ -23,10 +24,25 @@ import { enableSiteFooter } from './siteFooter';
 
 function Root() {
   useEffect(() => {
-    const cleanups = [enableCompactHeader(),enableProfilePopover(),enableAuthShowcase(),enableAuthControls(),enableNavFeatures(),enableNavIndicator(),enableWalletExperience(),enableSiteFooter()];
+    const cleanups = [
+      enableCompactHeader(),
+      enableProfilePopover(),
+      enableAuthShowcase(),
+      enableAuthControls(),
+      enableNavFeatures(),
+      enableNavIndicator(),
+      enableWalletExperience(),
+      enableSiteFooter()
+    ];
+
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
+
   return <App />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><Root /></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Root />
+  </React.StrictMode>
+);
