@@ -1,5 +1,5 @@
-// BENEFY premium footer v2.
-// Appears only on the Search page. Facebook and LinkedIn remain disabled until links are supplied.
+// BENEFY premium footer v3.
+// Visible only on the Search page. Facebook and LinkedIn remain disabled until URLs are provided.
 export function enableSiteFooter() {
   let observer;
   const INSTAGRAM_URL = 'https://www.instagram.com/benefy.il?igsi=MTc4bXluZ2NscGVw';
@@ -9,8 +9,7 @@ export function enableSiteFooter() {
     he: {
       company: 'חברה', legal: 'משפטי', support: 'תמיכה', about: 'אודות',
       terms: 'תנאי שימוש', privacy: 'פרטיות', contact: 'צור קשר',
-      tagline: 'המחיר האישי שלך, בכל קנייה.', rights: 'כל הזכויות שמורות.',
-      comingSoon: 'בקרוב', close: 'סגור',
+      rights: 'כל הזכויות שמורות.', comingSoon: 'בקרוב', close: 'סגור',
       aboutTitle: 'אודות BENEFY',
       aboutBody: 'BENEFY מרכזת במקום אחד את הכרטיסים, מועדוני ההטבות והמחירים, כדי לעזור למצוא את המחיר האישי והרלוונטי לכל קנייה.',
       termsTitle: 'תנאי שימוש',
@@ -21,8 +20,7 @@ export function enableSiteFooter() {
     en: {
       company: 'Company', legal: 'Legal', support: 'Support', about: 'About',
       terms: 'Terms of Use', privacy: 'Privacy', contact: 'Contact',
-      tagline: 'Your personal price, every purchase.', rights: 'All rights reserved.',
-      comingSoon: 'Coming soon', close: 'Close',
+      rights: 'All rights reserved.', comingSoon: 'Coming soon', close: 'Close',
       aboutTitle: 'About BENEFY',
       aboutBody: 'BENEFY brings cards, benefit clubs and prices together to help users find a relevant personal price for every purchase.',
       termsTitle: 'Terms of Use',
@@ -53,9 +51,7 @@ export function enableSiteFooter() {
     const copy = translations[language()];
     const modal = document.createElement('div');
     modal.className = 'legal-modal';
-    const title = copy[`${type}Title`];
-    const body = copy[`${type}Body`];
-    modal.innerHTML = `<button class="legal-modal__backdrop" type="button" aria-label="${copy.close}"></button><section class="legal-modal__panel" role="dialog" aria-modal="true"><button class="legal-modal__close" type="button" aria-label="${copy.close}">×</button><span class="legal-modal__eyebrow">BENEFY</span><h2>${title}</h2><p>${body}</p></section>`;
+    modal.innerHTML = `<button class="legal-modal__backdrop" type="button" aria-label="${copy.close}"></button><section class="legal-modal__panel" role="dialog" aria-modal="true"><button class="legal-modal__close" type="button" aria-label="${copy.close}">×</button><span class="legal-modal__eyebrow">BENEFY</span><h2>${copy[`${type}Title`]}</h2><p>${copy[`${type}Body`]}</p></section>`;
     modal.querySelector('.legal-modal__backdrop').addEventListener('click', closeModal);
     modal.querySelector('.legal-modal__close').addEventListener('click', closeModal);
     document.body.appendChild(modal);
@@ -67,30 +63,31 @@ export function enableSiteFooter() {
   }
 
   function createFooter() {
-    const copy = translations[language()];
+    const lang = language();
+    const copy = translations[lang];
     const year = new Date().getFullYear();
     const footer = document.createElement('footer');
-    footer.className = 'benefy-footer benefy-footer--columns';
+    footer.className = `benefy-footer benefy-footer--${lang}`;
+    footer.dir = lang === 'he' ? 'rtl' : 'ltr';
     footer.innerHTML = `
       <div class="benefy-footer__separator"><span></span></div>
       <div class="benefy-footer__main">
+        <div class="benefy-footer__columns">
+          <section><h3>${copy.company}</h3>${modalButton(copy.about, 'about')}</section>
+          <section><h3>${copy.legal}</h3>${modalButton(copy.terms, 'terms')}${modalButton(copy.privacy, 'privacy')}</section>
+          <section><h3>${copy.support}</h3><a href="mailto:${CONTACT_EMAIL}">${copy.contact}</a></section>
+        </div>
         <div class="benefy-footer__social-side">
           <div class="benefy-footer__logos" aria-label="BENEFY">
             <img class="benefy-footer__logo benefy-footer__logo--light" src="/benefy-logo-black.png" alt="BENEFY">
             <img class="benefy-footer__logo benefy-footer__logo--dark" src="/benefy-logo-white.png" alt="" aria-hidden="true">
           </div>
-          <p>${copy.tagline}</p>
           <div class="benefy-footer__socials">
             <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">${icons.instagram}</a>
             <button type="button" disabled title="${copy.comingSoon}" aria-label="Facebook - ${copy.comingSoon}">${icons.facebook}</button>
             <button type="button" disabled title="${copy.comingSoon}" aria-label="LinkedIn - ${copy.comingSoon}">${icons.linkedin}</button>
             <a href="mailto:${CONTACT_EMAIL}" aria-label="Email">${icons.mail}</a>
           </div>
-        </div>
-        <div class="benefy-footer__columns">
-          <section><h3>${copy.company}</h3>${modalButton(copy.about, 'about')}</section>
-          <section><h3>${copy.legal}</h3>${modalButton(copy.terms, 'terms')}${modalButton(copy.privacy, 'privacy')}</section>
-          <section><h3>${copy.support}</h3>${modalButton(copy.terms, 'terms')}<a href="mailto:${CONTACT_EMAIL}">${copy.contact}</a></section>
         </div>
       </div>
       <div class="benefy-footer__bottom"><span>© ${year} BENEFY. ${copy.rights}</span><span class="benefy-footer__status"><i></i> BENEFY Online</span></div>
