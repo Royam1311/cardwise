@@ -12,7 +12,7 @@ import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
 import './benefy-footer-v3.css';
-import './benefy-footer-spacing.css';
+import './benefy-footer-reveal.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
@@ -21,6 +21,7 @@ import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
 import { enableSiteFooter } from './siteFooter';
+import { enableFooterReveal } from './footerReveal';
 
 function Root() {
   useEffect(() => {
@@ -32,7 +33,8 @@ function Root() {
       enableNavFeatures(),
       enableNavIndicator(),
       enableWalletExperience(),
-      enableSiteFooter()
+      enableSiteFooter(),
+      enableFooterReveal()
     ];
 
     return () => cleanups.forEach(cleanup => cleanup?.());
