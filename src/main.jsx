@@ -5,10 +5,41 @@ import './styles.css';
 import './benefy-luxury.css';
 import './benefy-blue-theme.css';
 import './benefy-typography.css';
+import './benefy-header-v5.css';
+import './benefy-search-dark.css';
+import './benefy-auth-showcase-v9.css';
+import './benefy-nav-features.css';
+import './benefy-nav-indicator.css';
+import './benefy-wallet-experience.css';
+import './benefy-footer-v3.css';
+import './benefy-footer-reveal.css';
 import { enableCompactHeader } from './compactHeader';
+import { enableProfilePopover } from './profileEnhancer';
+import { enableAuthShowcase } from './authShowcase';
+import { enableAuthControls } from './authControls';
+import { enableNavFeatures } from './navFeatures';
+import { enableNavIndicator } from './navIndicator';
+import { enableWalletExperience } from './walletExperience';
+import { enableSiteFooter } from './siteFooter';
+import { enableFooterReveal } from './footerReveal';
 
 function Root() {
-  useEffect(() => enableCompactHeader(), []);
+  useEffect(() => {
+    const cleanups = [
+      enableCompactHeader(),
+      enableProfilePopover(),
+      enableAuthShowcase(),
+      enableAuthControls(),
+      enableNavFeatures(),
+      enableNavIndicator(),
+      enableWalletExperience(),
+      enableSiteFooter(),
+      enableFooterReveal()
+    ];
+
+    return () => cleanups.forEach(cleanup => cleanup?.());
+  }, []);
+
   return <App />;
 }
 
