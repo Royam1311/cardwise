@@ -1,0 +1,149 @@
+/* BENEFY Header Scroll Shell
+   At the top of the page the navigation is integrated into the page background.
+   After scrolling, the floating capsule is gradually created. */
+
+/* =========================
+   OPEN STATE: top of page
+   ========================= */
+.topbar:not(.is-compact) {
+  width: min(1440px, calc(100% - 52px)) !important;
+  min-height: 82px !important;
+  margin-top: 10px !important;
+  padding: 8px 18px !important;
+
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  transition:
+    width 900ms cubic-bezier(.22, 1, .36, 1),
+    min-height 900ms cubic-bezier(.22, 1, .36, 1),
+    margin-top 900ms cubic-bezier(.22, 1, .36, 1),
+    padding 900ms cubic-bezier(.22, 1, .36, 1),
+    border-color 650ms ease,
+    border-radius 900ms cubic-bezier(.22, 1, .36, 1),
+    background-color 650ms ease,
+    box-shadow 750ms ease,
+    backdrop-filter 750ms ease !important;
+}
+
+/* The inner navigation may keep its subtle segmented-control surface. */
+.topbar:not(.is-compact) > .nav-3d {
+  border-color: var(--benefy-border) !important;
+  background: color-mix(in srgb, var(--benefy-panel-raised) 24%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* Header controls become part of the page canvas. */
+.topbar:not(.is-compact) .header-control,
+.topbar:not(.is-compact) .profile-menu__trigger {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================
+   FLOATING STATE: on scroll
+   ========================= */
+.topbar.is-compact {
+  width: min(900px, calc(100% - 30px)) !important;
+  min-height: 62px !important;
+  margin-top: 14px !important;
+  padding: 6px 10px !important;
+
+  border: 1px solid var(--benefy-border) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--benefy-panel) 88%, transparent) !important;
+  box-shadow:
+    0 20px 55px var(--benefy-shadow),
+    inset 0 1px rgba(255,255,255,.055) !important;
+  backdrop-filter: blur(24px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(130%) !important;
+
+  transition:
+    width 900ms cubic-bezier(.22, 1, .36, 1),
+    min-height 900ms cubic-bezier(.22, 1, .36, 1),
+    margin-top 900ms cubic-bezier(.22, 1, .36, 1),
+    padding 900ms cubic-bezier(.22, 1, .36, 1),
+    border-color 650ms ease,
+    border-radius 900ms cubic-bezier(.22, 1, .36, 1),
+    background-color 650ms ease,
+    box-shadow 750ms ease,
+    backdrop-filter 750ms ease !important;
+}
+
+:root[data-theme="light"] .topbar.is-compact {
+  background: rgba(255,255,255,.84) !important;
+  box-shadow:
+    0 20px 55px rgba(39,69,100,.16),
+    inset 0 1px rgba(255,255,255,.94) !important;
+}
+
+:root[data-theme="dark"] .topbar.is-compact {
+  background: rgba(24,27,31,.86) !important;
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.38),
+    inset 0 1px rgba(255,255,255,.045) !important;
+}
+
+/* The shell and all important children resize together. */
+.topbar > .site-logo,
+.topbar > .nav-3d,
+.topbar > .header-actions,
+.topbar .nav-3d button,
+.topbar .header-control,
+.topbar .profile-menu__trigger {
+  transition:
+    width 900ms cubic-bezier(.22, 1, .36, 1),
+    height 900ms cubic-bezier(.22, 1, .36, 1),
+    min-height 900ms cubic-bezier(.22, 1, .36, 1),
+    padding 900ms cubic-bezier(.22, 1, .36, 1),
+    gap 900ms cubic-bezier(.22, 1, .36, 1),
+    color 300ms ease,
+    background-color 500ms ease,
+    border-color 500ms ease,
+    transform 900ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+
+/* Prevent the capsule from appearing immediately at tiny scroll movements. */
+.topbar {
+  will-change: width, min-height, padding, border-radius, background-color, box-shadow;
+}
+
+@media (max-width: 1050px) {
+  .topbar:not(.is-compact) {
+    width: calc(100% - 24px) !important;
+  }
+
+  .topbar.is-compact {
+    width: min(820px, calc(100% - 22px)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar:not(.is-compact) {
+    width: calc(100% - 16px) !important;
+    margin-top: 6px !important;
+    padding: 8px !important;
+  }
+
+  .topbar.is-compact {
+    width: calc(100% - 16px) !important;
+    border-radius: 26px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .topbar > .site-logo,
+  .topbar > .nav-3d,
+  .topbar > .header-actions,
+  .topbar .nav-3d button,
+  .topbar .header-control,
+  .topbar .profile-menu__trigger {
+    transition: none !important;
+  }
+}
