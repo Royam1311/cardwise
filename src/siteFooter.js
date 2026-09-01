@@ -1,38 +1,45 @@
-// BENEFY premium footer.
-// Appears only on the Search page and uses the existing light/dark logo assets.
+// BENEFY premium footer v2.
+// Appears only on the Search page. Facebook and LinkedIn remain disabled until links are supplied.
 export function enableSiteFooter() {
   let observer;
-
   const INSTAGRAM_URL = 'https://www.instagram.com/benefy.il?igsi=MTc4bXluZ2NscGVw';
   const CONTACT_EMAIL = 'benefymail@gmail.com';
 
-  const content = {
+  const translations = {
     he: {
-      about: 'אודות', terms: 'תנאי שימוש', contact: 'צור קשר',
+      company: 'חברה', legal: 'משפטי', support: 'תמיכה', about: 'אודות',
+      terms: 'תנאי שימוש', privacy: 'פרטיות', contact: 'צור קשר',
       tagline: 'המחיר האישי שלך, בכל קנייה.', rights: 'כל הזכויות שמורות.',
+      comingSoon: 'בקרוב', close: 'סגור',
       aboutTitle: 'אודות BENEFY',
-      aboutBody: 'BENEFY עוזרת להשוות את המחיר האישי לאחר הטבות, כרטיסים ומועדוני צרכנות, במקום אחד ברור ונוח.',
+      aboutBody: 'BENEFY מרכזת במקום אחד את הכרטיסים, מועדוני ההטבות והמחירים, כדי לעזור למצוא את המחיר האישי והרלוונטי לכל קנייה.',
       termsTitle: 'תנאי שימוש',
-      termsBody: 'המידע באתר מיועד להשוואה כללית. מחירים, מלאי והטבות עשויים להשתנות, והמחיר הקובע הוא המחיר המוצג באתר החנות בעת הרכישה.',
-      close: 'סגור', instagram: 'Instagram'
+      termsBody: 'השימוש באתר כפוף לתנאים המוצגים כאן. מחירים, מלאי והטבות עשויים להשתנות, והמחיר הקובע הוא המחיר המוצג באתר החנות בעת הרכישה.',
+      privacyTitle: 'מדיניות פרטיות',
+      privacyBody: 'BENEFY שומרת רק את בחירות ההטבות והכרטיסים הנדרשות להתאמת המחיר. BENEFY אינה שומרת מספרי כרטיס, CVV או פרטי תשלום רגישים.'
     },
     en: {
-      about: 'About', terms: 'Terms of Use', contact: 'Contact',
+      company: 'Company', legal: 'Legal', support: 'Support', about: 'About',
+      terms: 'Terms of Use', privacy: 'Privacy', contact: 'Contact',
       tagline: 'Your personal price, every purchase.', rights: 'All rights reserved.',
+      comingSoon: 'Coming soon', close: 'Close',
       aboutTitle: 'About BENEFY',
-      aboutBody: 'BENEFY helps compare your personal price after cards, benefits and consumer clubs, in one clear and convenient place.',
+      aboutBody: 'BENEFY brings cards, benefit clubs and prices together to help users find a relevant personal price for every purchase.',
       termsTitle: 'Terms of Use',
-      termsBody: 'Information on the site is provided for general comparison. Prices, availability and benefits may change. The binding price is the price displayed by the retailer at checkout.',
-      close: 'Close', instagram: 'Instagram'
+      termsBody: 'Use of the site is subject to these terms. Prices, availability and benefits may change, and the binding price is the retailer price shown at checkout.',
+      privacyTitle: 'Privacy Policy',
+      privacyBody: 'BENEFY stores only benefit and card-program selections required for personalized pricing. BENEFY does not store card numbers, CVV codes or sensitive payment details.'
     }
   };
 
-  const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg>';
-  const mailIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const icons = {
+    instagram: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4.3c-.5-.1-2.2-.3-4.1-.3C9 4 7 6.1 7 10v2H4v4h3v8h4v-8h3.1l.9-4h-4v-1.6C11 8.8 11.4 8 14 8Z" fill="currentColor"/></svg>',
+    linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="4" height="12" rx="1" fill="currentColor"/><circle cx="5" cy="5" r="2" fill="currentColor"/><path d="M10 9h4v1.7c1-1.4 2.4-2.2 4.2-2.2 3.2 0 4.8 2.1 4.8 6.1V21h-4v-5.7c0-2-.7-3.1-2.2-3.1-1.8 0-2.8 1.2-2.8 3.6V21h-4V9Z" fill="currentColor"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
 
-  function language() {
-    return document.documentElement.lang === 'en' ? 'en' : 'he';
-  }
+  const language = () => document.documentElement.lang === 'en' ? 'en' : 'he';
 
   function closeModal() {
     const modal = document.querySelector('.legal-modal');
@@ -43,53 +50,52 @@ export function enableSiteFooter() {
 
   function openModal(type) {
     closeModal();
-    const copy = content[language()];
+    const copy = translations[language()];
     const modal = document.createElement('div');
     modal.className = 'legal-modal';
-    modal.innerHTML = `
-      <button class="legal-modal__backdrop" type="button" aria-label="${copy.close}"></button>
-      <section class="legal-modal__panel" role="dialog" aria-modal="true">
-        <button class="legal-modal__close" type="button" aria-label="${copy.close}">×</button>
-        <span class="legal-modal__eyebrow">BENEFY</span>
-        <h2>${type === 'about' ? copy.aboutTitle : copy.termsTitle}</h2>
-        <p>${type === 'about' ? copy.aboutBody : copy.termsBody}</p>
-      </section>
-    `;
+    const title = copy[`${type}Title`];
+    const body = copy[`${type}Body`];
+    modal.innerHTML = `<button class="legal-modal__backdrop" type="button" aria-label="${copy.close}"></button><section class="legal-modal__panel" role="dialog" aria-modal="true"><button class="legal-modal__close" type="button" aria-label="${copy.close}">×</button><span class="legal-modal__eyebrow">BENEFY</span><h2>${title}</h2><p>${body}</p></section>`;
     modal.querySelector('.legal-modal__backdrop').addEventListener('click', closeModal);
     modal.querySelector('.legal-modal__close').addEventListener('click', closeModal);
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('is-open'));
   }
 
+  function modalButton(label, type) {
+    return `<button type="button" data-footer-modal="${type}">${label}</button>`;
+  }
+
   function createFooter() {
-    const copy = content[language()];
+    const copy = translations[language()];
     const year = new Date().getFullYear();
     const footer = document.createElement('footer');
-    footer.className = 'benefy-footer';
+    footer.className = 'benefy-footer benefy-footer--columns';
     footer.innerHTML = `
       <div class="benefy-footer__separator"><span></span></div>
-      <div class="benefy-footer__content">
-        <div class="benefy-footer__brand">
+      <div class="benefy-footer__main">
+        <div class="benefy-footer__social-side">
           <div class="benefy-footer__logos" aria-label="BENEFY">
             <img class="benefy-footer__logo benefy-footer__logo--light" src="/benefy-logo-black.png" alt="BENEFY">
             <img class="benefy-footer__logo benefy-footer__logo--dark" src="/benefy-logo-white.png" alt="" aria-hidden="true">
           </div>
           <p>${copy.tagline}</p>
+          <div class="benefy-footer__socials">
+            <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">${icons.instagram}</a>
+            <button type="button" disabled title="${copy.comingSoon}" aria-label="Facebook - ${copy.comingSoon}">${icons.facebook}</button>
+            <button type="button" disabled title="${copy.comingSoon}" aria-label="LinkedIn - ${copy.comingSoon}">${icons.linkedin}</button>
+            <a href="mailto:${CONTACT_EMAIL}" aria-label="Email">${icons.mail}</a>
+          </div>
         </div>
-        <nav class="benefy-footer__nav" aria-label="Footer">
-          <button type="button" data-footer-modal="about">${copy.about}</button>
-          <button type="button" data-footer-modal="terms">${copy.terms}</button>
-          <a href="mailto:${CONTACT_EMAIL}">${copy.contact}</a>
-        </nav>
-        <div class="benefy-footer__contact">
-          <a class="benefy-footer__email" href="mailto:${CONTACT_EMAIL}">${mailIcon}<span>${CONTACT_EMAIL}</span></a>
-          <a class="benefy-footer__social" href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" aria-label="${copy.instagram}">${instagramIcon}</a>
+        <div class="benefy-footer__columns">
+          <section><h3>${copy.company}</h3>${modalButton(copy.about, 'about')}</section>
+          <section><h3>${copy.legal}</h3>${modalButton(copy.terms, 'terms')}${modalButton(copy.privacy, 'privacy')}</section>
+          <section><h3>${copy.support}</h3>${modalButton(copy.terms, 'terms')}<a href="mailto:${CONTACT_EMAIL}">${copy.contact}</a></section>
         </div>
       </div>
-      <div class="benefy-footer__bottom"><span>© ${year} BENEFY</span><span>${copy.rights}</span></div>
+      <div class="benefy-footer__bottom"><span>© ${year} BENEFY. ${copy.rights}</span><span class="benefy-footer__status"><i></i> BENEFY Online</span></div>
     `;
-    footer.querySelector('[data-footer-modal="about"]').addEventListener('click', () => openModal('about'));
-    footer.querySelector('[data-footer-modal="terms"]').addEventListener('click', () => openModal('terms'));
+    footer.querySelectorAll('[data-footer-modal]').forEach(button => button.addEventListener('click', () => openModal(button.dataset.footerModal)));
     return footer;
   }
 
@@ -99,22 +105,12 @@ export function enableSiteFooter() {
     const results = root?.querySelector('.results-premium');
     const existing = root?.querySelector(':scope > .benefy-footer');
     const searchVisible = hero && results && hero.dataset.featureHidden !== 'true' && results.dataset.featureHidden !== 'true';
-
-    if (!searchVisible) {
-      existing?.remove();
-      return;
-    }
-
+    if (!searchVisible) return existing?.remove();
     if (!existing) root.appendChild(createFooter());
   }
 
   sync();
   observer = new MutationObserver(sync);
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-feature-hidden', 'class', 'lang'] });
-
-  return () => {
-    observer?.disconnect();
-    document.querySelector('.benefy-footer')?.remove();
-    closeModal();
-  };
+  return () => { observer?.disconnect(); document.querySelector('.benefy-footer')?.remove(); closeModal(); };
 }
