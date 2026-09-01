@@ -1,0 +1,219 @@
+/* BENEFY hero wallet visual
+   Replaces the left benefits text panel with an angled wallet and three cards. */
+
+.hero-benefits-card.hero-wallet-visual {
+  top: 305px !important;
+  left: clamp(26px, 5vw, 92px) !important;
+  width: 320px !important;
+  min-height: 390px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: heroWalletFloat 8s ease-in-out infinite !important;
+  transform: rotate(-7deg);
+  transform-origin: center 72%;
+}
+
+.hero-wallet-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 390px;
+  filter: drop-shadow(0 26px 48px rgba(0,0,0,.30));
+}
+
+.hero-wallet-card {
+  position: absolute;
+  left: 50%;
+  width: 242px;
+  height: 146px;
+  padding: 18px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 23px;
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(0,0,0,.27), inset 0 1px rgba(255,255,255,.12);
+  transform-origin: bottom center;
+}
+
+.hero-wallet-card::after {
+  content: "";
+  position: absolute;
+  top: -90%;
+  left: -20%;
+  width: 42%;
+  height: 250%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);
+}
+
+.hero-wallet-card span {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-wallet-card strong {
+  font-family: Inter, Heebo, sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.hero-wallet-card b {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255,255,255,.17);
+  border-radius: 11px;
+  background: rgba(255,255,255,.10);
+  font-size: 15px;
+}
+
+.hero-wallet-card small {
+  position: absolute;
+  z-index: 1;
+  left: 20px;
+  bottom: 18px;
+  color: rgba(255,255,255,.70);
+  font: 650 9px/1 Inter, sans-serif;
+  letter-spacing: .13em;
+}
+
+.hero-wallet-card--htz {
+  top: 4px;
+  background: radial-gradient(circle at 16% 0%,rgba(220,214,255,.24),transparent 36%),linear-gradient(145deg,#6776dd,#392873 82%);
+  transform: translateX(-50%) rotate(-5deg);
+}
+
+.hero-wallet-card--haver {
+  top: 48px;
+  background: radial-gradient(circle at 14% 0%,rgba(216,255,231,.22),transparent 36%),linear-gradient(145deg,#4a916f,#173b2c 82%);
+  transform: translateX(-50%) rotate(3deg);
+}
+
+.hero-wallet-card--max {
+  top: 94px;
+  background: radial-gradient(circle at 14% 0%,rgba(255,255,255,.15),transparent 36%),linear-gradient(145deg,#393d45,#090b0f 82%);
+  transform: translateX(-50%) rotate(-1deg);
+}
+
+.hero-wallet-pocket {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 0;
+  width: 280px;
+  height: 245px;
+  overflow: hidden;
+  border: 1px solid rgba(207,231,255,.16);
+  border-radius: 30px 30px 38px 38px;
+  background:
+    radial-gradient(circle at 24% 0%,rgba(140,191,247,.11),transparent 40%),
+    linear-gradient(155deg,#242a31,#11151a 78%);
+  box-shadow: 0 34px 70px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.065);
+  transform: translateX(-50%);
+}
+
+.hero-wallet-pocket::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(207,231,255,.07);
+  border-radius: 21px 21px 29px 29px;
+}
+
+.hero-wallet-pocket__slot {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  width: 76%;
+  height: 8px;
+  border-radius: 99px;
+  background: #090c10;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.72), 0 1px rgba(255,255,255,.04);
+  transform: translateX(-50%);
+}
+
+.hero-wallet-pocket__shine {
+  position: absolute;
+  top: -60%;
+  left: -45%;
+  width: 48%;
+  height: 220%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.045),transparent);
+}
+
+.hero-wallet-pocket__brand {
+  position: absolute;
+  left: 28px;
+  bottom: 27px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-wallet-pocket__brand i {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  border-radius: 12px;
+  color: #102033;
+  background: linear-gradient(145deg,var(--benefy-blue-soft),var(--benefy-blue));
+  font: 900 18px/1 Inter,sans-serif;
+  font-style: normal;
+}
+
+.hero-wallet-pocket__brand span {
+  display: grid;
+  gap: 3px;
+}
+
+.hero-wallet-pocket__brand strong {
+  font: 850 14px/1 Inter,sans-serif;
+  letter-spacing: .08em;
+}
+
+.hero-wallet-pocket__brand small {
+  color: var(--benefy-muted);
+  font: 650 8px/1 Inter,sans-serif;
+  letter-spacing: .12em;
+}
+
+@keyframes heroWalletFloat {
+  0%,100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+:root[data-theme="light"] .hero-wallet-pocket {
+  background: radial-gradient(circle at 24% 0%,rgba(121,184,242,.17),transparent 42%),linear-gradient(155deg,#f8fbff,#dfe8f1 82%);
+  box-shadow: 0 30px 65px rgba(35,68,101,.20),inset 0 1px rgba(255,255,255,.96);
+}
+
+:root[data-theme="light"] .hero-wallet-pocket__slot { background:#b5c2cd; }
+:root[data-theme="light"] .hero-wallet-pocket__brand strong { color:#172231; }
+
+@media(max-width:1180px) {
+  .hero-benefits-card.hero-wallet-visual {
+    left: -82px !important;
+    opacity: .72 !important;
+    transform: rotate(-7deg) scale(.88);
+  }
+}
+
+@media(max-width:850px) {
+  .hero-benefits-card.hero-wallet-visual { display:none !important; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .hero-benefits-card.hero-wallet-visual { animation:none !important; }
+}
