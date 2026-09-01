@@ -1,0 +1,105 @@
+/* BENEFY sliding navigation pill */
+
+.nav-3d.nav-with-indicator {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.nav-sliding-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--indicator-width, 0px);
+  height: var(--indicator-height, 0px);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--benefy-blue-soft), var(--benefy-blue));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .84),
+    inset 0 -3px rgba(58, 121, 179, .10),
+    0 9px 24px rgba(82, 148, 211, .17);
+  transform: translate3d(
+    var(--indicator-x, 0px),
+    var(--indicator-y, 0px),
+    0
+  );
+  transition:
+    transform 460ms cubic-bezier(.22, 1, .36, 1),
+    width 460ms cubic-bezier(.22, 1, .36, 1),
+    height 460ms cubic-bezier(.22, 1, .36, 1),
+    opacity 180ms ease;
+  will-change: transform, width, height;
+}
+
+.nav-sliding-indicator.is-visible {
+  opacity: 1;
+}
+
+.nav-sliding-indicator.no-transition {
+  transition: none !important;
+}
+
+/* Buttons stay transparent. The single pill supplies the active background. */
+.nav-3d.nav-with-indicator button {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition:
+    color 360ms ease,
+    opacity 360ms ease,
+    transform 300ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.nav-3d.nav-with-indicator button.active {
+  color: #102033;
+}
+
+.nav-3d.nav-with-indicator button:not(.active) {
+  color: var(--benefy-muted);
+}
+
+.nav-3d.nav-with-indicator button:hover:not(.active) {
+  color: var(--benefy-text);
+  background: var(--benefy-blue-wash) !important;
+}
+
+.nav-3d.nav-with-indicator button .nav-icon,
+.nav-3d.nav-with-indicator button > span {
+  transition:
+    color 360ms ease,
+    transform 360ms cubic-bezier(.22, 1, .36, 1),
+    opacity 360ms ease;
+}
+
+.nav-3d.nav-with-indicator button.active .nav-icon {
+  transform: scale(1.06);
+}
+
+:root[data-theme="light"] .nav-sliding-indicator {
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .94),
+    inset 0 -3px rgba(58, 121, 179, .08),
+    0 9px 24px rgba(59, 119, 175, .14);
+}
+
+/* Horizontal mobile navigation keeps the indicator synchronized while scrolling. */
+@media (max-width: 760px) {
+  .nav-3d.nav-with-indicator {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-sliding-indicator,
+  .nav-3d.nav-with-indicator button,
+  .nav-3d.nav-with-indicator button .nav-icon,
+  .nav-3d.nav-with-indicator button > span {
+    transition: none !important;
+  }
+}
