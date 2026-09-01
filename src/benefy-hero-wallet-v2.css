@@ -1,0 +1,227 @@
+/* BENEFY hero wallet v2
+   Restores the wallet to the left, removes the B badge and exposes Haver clearly. */
+
+/* Important: the backlight layer previously applied position:relative to this element.
+   Restore absolute positioning so the wallet returns to the left side of the hero. */
+.hero-benefits-card.hero-wallet-visual {
+  position: absolute !important;
+  z-index: 9 !important;
+  top: 300px !important;
+  left: clamp(20px, 4.5vw, 84px) !important;
+  right: auto !important;
+  width: 330px !important;
+  min-height: 405px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: rotate(-7deg) !important;
+  transform-origin: center 72% !important;
+  animation: heroWalletV2Float 9s ease-in-out infinite !important;
+}
+
+.hero-wallet-stack {
+  position: relative;
+  width: 100%;
+  min-height: 405px;
+  filter: drop-shadow(0 30px 54px rgba(0,0,0,.34));
+}
+
+.hero-wallet-card {
+  position: absolute;
+  left: 50%;
+  width: 252px;
+  height: 150px;
+  padding: 17px 19px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 23px;
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.11);
+  transform-origin: bottom center;
+}
+
+.hero-wallet-card::after {
+  content: "";
+  position: absolute;
+  top: -90%;
+  left: -20%;
+  width: 42%;
+  height: 250%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);
+}
+
+.hero-wallet-card > span {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  direction: rtl;
+}
+
+.hero-wallet-card strong {
+  display: block;
+  max-width: 165px;
+  overflow: visible;
+  color: #fff;
+  font-family: Heebo, Inter, sans-serif;
+  font-size: 23px;
+  font-weight: 850;
+  line-height: 1.25;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px rgba(0,0,0,.22);
+}
+
+.hero-wallet-card b {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid rgba(255,255,255,.17);
+  border-radius: 11px;
+  background: rgba(255,255,255,.11);
+  font-size: 15px;
+}
+
+.hero-wallet-card small {
+  position: absolute;
+  z-index: 2;
+  left: 19px;
+  bottom: 17px;
+  color: rgba(255,255,255,.70);
+  font: 650 9px/1 Inter,sans-serif;
+  letter-spacing: .13em;
+}
+
+.hero-wallet-card--htz {
+  top: 0;
+  background: radial-gradient(circle at 16% 0%,rgba(220,214,255,.24),transparent 36%),linear-gradient(145deg,#6776dd,#392873 82%);
+  transform: translateX(-50%) rotate(-5deg);
+}
+
+/* Haver is lifted and shifted right so the full word remains visible. */
+.hero-wallet-card--haver {
+  top: 50px;
+  margin-left: 9px;
+  background: radial-gradient(circle at 14% 0%,rgba(216,255,231,.22),transparent 36%),linear-gradient(145deg,#4a916f,#173b2c 82%);
+  transform: translateX(-50%) rotate(3deg);
+}
+
+.hero-wallet-card--haver strong {
+  padding-inline-end: 5px;
+  font-size: 24px;
+}
+
+.hero-wallet-card--max {
+  top: 103px;
+  background: radial-gradient(circle at 14% 0%,rgba(255,255,255,.15),transparent 36%),linear-gradient(145deg,#393d45,#090b0f 82%);
+  transform: translateX(-50%) rotate(-1deg);
+}
+
+.hero-wallet-pocket {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 0;
+  width: 290px;
+  height: 248px;
+  overflow: hidden;
+  border: 1px solid rgba(207,231,255,.16);
+  border-radius: 30px 30px 38px 38px;
+  background: radial-gradient(circle at 24% 0%,rgba(140,191,247,.11),transparent 40%),linear-gradient(155deg,#242a31,#11151a 78%);
+  box-shadow: 0 34px 70px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.065);
+  transform: translateX(-50%);
+}
+
+.hero-wallet-pocket::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(207,231,255,.07);
+  border-radius: 21px 21px 29px 29px;
+}
+
+.hero-wallet-pocket__slot {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  width: 76%;
+  height: 8px;
+  border-radius: 99px;
+  background: #090c10;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.72),0 1px rgba(255,255,255,.04);
+  transform: translateX(-50%);
+}
+
+.hero-wallet-pocket__shine {
+  position: absolute;
+  top: -60%;
+  left: -45%;
+  width: 48%;
+  height: 220%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.045),transparent);
+}
+
+/* Centered wordmark only. The former B badge is intentionally removed. */
+.hero-wallet-pocket__brand {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: max-content;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.hero-wallet-pocket__brand strong {
+  color: #f2f5f7;
+  font: 850 15px/1 Inter,sans-serif;
+  letter-spacing: .10em;
+}
+
+.hero-wallet-pocket__brand small {
+  color: #9eabb7;
+  font: 650 8px/1 Inter,sans-serif;
+  letter-spacing: .15em;
+}
+
+@keyframes heroWalletV2Float {
+  0%,100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+:root[data-theme="light"] .hero-wallet-pocket {
+  background: radial-gradient(circle at 24% 0%,rgba(121,184,242,.17),transparent 42%),linear-gradient(155deg,#f8fbff,#dfe8f1 82%);
+  box-shadow: 0 30px 65px rgba(35,68,101,.20),inset 0 1px rgba(255,255,255,.96);
+}
+
+:root[data-theme="light"] .hero-wallet-pocket__slot { background:#b5c2cd; }
+:root[data-theme="light"] .hero-wallet-pocket__brand strong { color:#172231; }
+:root[data-theme="light"] .hero-wallet-pocket__brand small { color:#647586; }
+
+@media(max-width:1180px) {
+  .hero-benefits-card.hero-wallet-visual {
+    left: -86px !important;
+    opacity: .74 !important;
+    transform: rotate(-7deg) scale(.88) !important;
+  }
+}
+
+@media(max-width:850px) {
+  .hero-benefits-card.hero-wallet-visual { display:none !important; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .hero-benefits-card.hero-wallet-visual { animation:none !important; }
+}
