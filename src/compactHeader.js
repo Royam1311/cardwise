@@ -1,9 +1,11 @@
-// Smooth compact-header behavior with hysteresis to prevent abrupt toggling.
+// BENEFY smooth header shell.
+// The floating capsule appears only after meaningful downward scrolling.
 export function enableCompactHeader() {
   let ticking = false;
   let compact = false;
 
-  const ENTER_COMPACT_AT = 150;
+  // Hysteresis prevents flickering around the activation point.
+  const ENTER_COMPACT_AT = 170;
   const EXIT_COMPACT_AT = 55;
 
   function update() {
@@ -13,12 +15,12 @@ export function enableCompactHeader() {
       return;
     }
 
-    const shouldCompact = compact
+    const nextCompact = compact
       ? window.scrollY > EXIT_COMPACT_AT
       : window.scrollY > ENTER_COMPACT_AT;
 
-    if (shouldCompact !== compact) {
-      compact = shouldCompact;
+    if (nextCompact !== compact) {
+      compact = nextCompact;
       header.classList.toggle('is-compact', compact);
     }
 
