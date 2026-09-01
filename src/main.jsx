@@ -10,6 +10,7 @@ import './benefy-header-scroll-shell.css';
 import './benefy-header-glass.css';
 import './benefy-search-dark.css';
 import './benefy-hero-experience.css';
+import './benefy-hero-wallet.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
@@ -20,6 +21,7 @@ import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableHeroExperience } from './heroExperience';
+import { enableHeroWalletVisual } from './heroWalletVisual';
 import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
@@ -29,8 +31,8 @@ function Root() {
   useEffect(() => {
     const cleanups = [
       enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
-      enableAuthControls(), enableHeroExperience(), enableNavFeatures(),
-      enableNavIndicator(), enableWalletExperience(), enableSiteFooter(),
+      enableAuthControls(), enableHeroExperience(), enableHeroWalletVisual(),
+      enableNavFeatures(), enableNavIndicator(), enableWalletExperience(), enableSiteFooter()
     ];
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
