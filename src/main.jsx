@@ -11,7 +11,7 @@ import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
-import './benefy-footer-v2.css';
+import './benefy-footer-v3.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
