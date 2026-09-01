@@ -9,41 +9,34 @@ import './benefy-header-v5.css';
 import './benefy-header-scroll-shell.css';
 import './benefy-header-glass.css';
 import './benefy-search-dark.css';
+import './benefy-hero-experience.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
 import './benefy-footer-v3.css';
+import './benefy-footer-reveal.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
+import { enableHeroExperience } from './heroExperience';
 import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
 import { enableSiteFooter } from './siteFooter';
+import { enableFooterReveal } from './footerReveal';
 
 function Root() {
   useEffect(() => {
     const cleanups = [
-      enableCompactHeader(),
-      enableProfilePopover(),
-      enableAuthShowcase(),
-      enableAuthControls(),
-      enableNavFeatures(),
-      enableNavIndicator(),
-      enableWalletExperience(),
-      enableSiteFooter(),
+      enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
+      enableAuthControls(), enableHeroExperience(), enableNavFeatures(),
+      enableNavIndicator(), enableWalletExperience(), enableSiteFooter(), enableFooterReveal()
     ];
-
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
-
   return <App />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
-);
+ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><Root /></React.StrictMode>);
