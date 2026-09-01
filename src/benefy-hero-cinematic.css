@@ -1,0 +1,160 @@
+/* BENEFY Cinematic Hero v1
+   COYA-inspired composition, translated into BENEFY's charcoal, pastel-blue,
+   indigo and mint visual identity. Visual-only override. */
+
+.hero-premium--experience {
+  isolation: isolate;
+  min-height: 930px;
+  padding-bottom: 240px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 21%, rgba(73, 91, 154, .19) 0%, rgba(67, 77, 132, .095) 32%, transparent 70%),
+    radial-gradient(ellipse 46% 33% at 59% 31%, rgba(94, 171, 177, .085) 0%, transparent 68%),
+    radial-gradient(ellipse 45% 31% at 40% 34%, rgba(107, 123, 205, .075) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(18, 21, 26, .05), rgba(10, 12, 15, .18)) !important;
+}
+
+/* Remove every old geometric hero panel and side-localized light source. */
+.hero-premium::before,
+.hero-premium::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Wide atmospheric haze, not one obvious glow and not two side spotlights. */
+.hero-premium--experience .hero-experience {
+  background:
+    radial-gradient(ellipse 92% 25% at 50% 80%, rgba(61, 112, 153, .045), transparent 74%),
+    linear-gradient(100deg, transparent 12%, rgba(123, 134, 216, .025) 38%, rgba(105, 192, 185, .025) 61%, transparent 88%);
+}
+
+.hero-premium--experience > span {
+  margin-bottom: 28px;
+  border-color: rgba(207, 231, 255, .22);
+  background: rgba(28, 34, 42, .54);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(16px);
+}
+
+.hero-premium--experience > h1 {
+  max-width: 980px;
+  margin-inline: auto;
+  text-shadow: 0 22px 70px rgba(0, 0, 0, .30);
+}
+
+.hero-premium--experience > form {
+  margin-top: 42px;
+}
+
+/* The wallet and deal card sit at different heights for a cinematic asymmetry. */
+.hero-benefits-card.hero-wallet-visual {
+  top: 290px !important;
+  left: clamp(16px, 4vw, 76px) !important;
+  transform: rotate(-8deg) scale(.98);
+  filter: drop-shadow(0 34px 58px rgba(0, 0, 0, .34));
+}
+
+.hero-deal-card {
+  top: 365px !important;
+  right: clamp(18px, 4.2vw, 82px) !important;
+  transform: rotate(4deg);
+  border-color: rgba(207, 231, 255, .12);
+  background:
+    radial-gradient(circle at 70% 0%, rgba(116, 212, 197, .08), transparent 42%),
+    rgba(24, 29, 35, .76);
+  box-shadow: 0 34px 88px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .045);
+}
+
+/* Calm movement only. */
+.hero-benefits-card.hero-wallet-visual {
+  animation: cinematicWalletFloat 9s ease-in-out infinite !important;
+}
+
+.hero-deal-card {
+  animation: cinematicDealFloat 10.5s ease-in-out infinite -3.5s !important;
+}
+
+@keyframes cinematicWalletFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+@keyframes cinematicDealFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 7px; }
+}
+
+/* Benefit chips become atmospheric details. */
+.hero-chip {
+  opacity: .105 !important;
+  border-color: rgba(207, 231, 255, .08) !important;
+  background: rgba(24, 30, 37, .38) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .10) !important;
+  backdrop-filter: blur(14px);
+}
+
+.hero-chip--1 { top: 24%; left: 25%; }
+.hero-chip--2 { top: 17%; right: 22%; }
+.hero-chip--3 { bottom: 29%; left: 24%; }
+.hero-chip--4 { bottom: 24%; right: 22%; }
+
+/* Premium, open metrics row. */
+.hero-metrics {
+  bottom: 72px;
+  width: min(780px, calc(100% - 44px));
+  border-color: rgba(207, 231, 255, .10);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.012), transparent);
+}
+
+.hero-metrics strong {
+  color: #f2f5f7;
+}
+
+/* Fine-grain depth without visible tiles. */
+.hero-premium--experience {
+  background-color: #101216 !important;
+}
+
+:root[data-theme="light"] .hero-premium--experience {
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 21%, rgba(108, 124, 207, .16) 0%, rgba(108, 124, 207, .065) 34%, transparent 71%),
+    radial-gradient(ellipse 46% 33% at 59% 31%, rgba(86, 177, 174, .105) 0%, transparent 69%),
+    radial-gradient(ellipse 45% 31% at 40% 34%, rgba(121, 184, 242, .085) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(248, 251, 255, .15), rgba(232, 241, 249, .28)) !important;
+  background-color: #f4f8fc !important;
+}
+
+:root[data-theme="light"] .hero-deal-card {
+  background:
+    radial-gradient(circle at 70% 0%, rgba(104, 197, 184, .12), transparent 43%),
+    rgba(255, 255, 255, .68);
+  box-shadow: 0 30px 78px rgba(35, 68, 101, .15), inset 0 1px rgba(255,255,255,.92);
+}
+
+:root[data-theme="light"] .hero-metrics strong { color: #172231; }
+:root[data-theme="light"] .hero-chip { background: rgba(255,255,255,.32) !important; }
+
+@media (max-width: 1180px) {
+  .hero-benefits-card.hero-wallet-visual { left: -94px !important; }
+  .hero-deal-card { right: -72px !important; }
+}
+
+@media (max-width: 850px) {
+  .hero-premium--experience {
+    min-height: 790px;
+    background:
+      radial-gradient(ellipse 92% 45% at 50% 24%, rgba(96, 121, 197, .12), transparent 72%),
+      radial-gradient(ellipse 65% 32% at 58% 36%, rgba(92, 180, 177, .065), transparent 72%),
+      transparent !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-benefits-card.hero-wallet-visual,
+  .hero-deal-card {
+    animation: none !important;
+  }
+}
