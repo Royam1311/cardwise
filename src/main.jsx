@@ -11,6 +11,7 @@ import './benefy-header-glass.css';
 import './benefy-search-dark.css';
 import './benefy-hero-experience.css';
 import './benefy-hero-wallet.css';
+import './benefy-hero-lightwash.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
@@ -30,13 +31,26 @@ import { enableSiteFooter } from './siteFooter';
 function Root() {
   useEffect(() => {
     const cleanups = [
-      enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
-      enableAuthControls(), enableHeroExperience(), enableHeroWalletVisual(),
-      enableNavFeatures(), enableNavIndicator(), enableWalletExperience(), enableSiteFooter()
+      enableCompactHeader(),
+      enableProfilePopover(),
+      enableAuthShowcase(),
+      enableAuthControls(),
+      enableHeroExperience(),
+      enableHeroWalletVisual(),
+      enableNavFeatures(),
+      enableNavIndicator(),
+      enableWalletExperience(),
+      enableSiteFooter()
     ];
+
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
+
   return <App />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><Root /></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Root />
+  </React.StrictMode>
+);
