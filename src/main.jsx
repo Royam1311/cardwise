@@ -9,11 +9,13 @@ import './benefy-header-v5.css';
 import './benefy-search-dark.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
+import './benefy-nav-indicator.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableNavFeatures } from './navFeatures';
+import { enableNavIndicator } from './navIndicator';
 
 function Root() {
   useEffect(() => {
@@ -22,12 +24,15 @@ function Root() {
     const disableAuthShowcase = enableAuthShowcase();
     const disableAuthControls = enableAuthControls();
     const disableNavFeatures = enableNavFeatures();
+    const disableNavIndicator = enableNavIndicator();
+
     return () => {
       disableCompactHeader?.();
       disableProfilePopover?.();
       disableAuthShowcase?.();
       disableAuthControls?.();
       disableNavFeatures?.();
+      disableNavIndicator?.();
     };
   }, []);
 
