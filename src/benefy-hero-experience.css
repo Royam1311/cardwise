@@ -1,0 +1,208 @@
+/* BENEFY premium fintech hero experience */
+
+.hero-premium--experience {
+  position: relative;
+  min-height: 900px;
+  padding-bottom: 235px;
+  overflow: hidden;
+}
+
+.hero-premium--experience > span,
+.hero-premium--experience > h1,
+.hero-premium--experience > form {
+  position: relative;
+  z-index: 12;
+}
+
+.hero-experience {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.hero-benefits-card,
+.hero-deal-card {
+  position: absolute;
+  width: 280px;
+  min-height: 330px;
+  padding: 22px;
+  border: 1px solid var(--benefy-border);
+  border-radius: 28px;
+  color: var(--benefy-text);
+  background:
+    radial-gradient(circle at 50% 0%, var(--benefy-blue-wash), transparent 42%),
+    color-mix(in srgb, var(--benefy-panel) 84%, transparent);
+  box-shadow:
+    0 30px 85px var(--benefy-shadow),
+    0 0 42px rgba(140,191,247,.055),
+    inset 0 1px rgba(255,255,255,.045);
+  backdrop-filter: blur(22px) saturate(120%);
+  -webkit-backdrop-filter: blur(22px) saturate(120%);
+  animation: heroCardFloat 7.5s ease-in-out infinite;
+}
+
+.hero-benefits-card {
+  left: clamp(18px, 4vw, 72px);
+  top: 315px;
+}
+
+.hero-deal-card {
+  right: clamp(18px, 4vw, 72px);
+  top: 350px;
+  animation-delay: -3.2s;
+}
+
+.hero-example-badge {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--benefy-muted);
+  background: rgba(255,255,255,.04);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.hero-benefits-card header,
+.hero-deal-card header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.hero-card-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--benefy-blue-wash);
+}
+
+.hero-benefits-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  color: var(--benefy-muted);
+  font-size: 14px;
+}
+
+.hero-benefits-card li::first-letter { color: #43d39e; }
+.hero-benefits-card > b {
+  display: inline-flex;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: var(--benefy-blue-deep);
+  background: var(--benefy-blue-wash);
+  font-size: 12px;
+}
+
+.hero-benefits-card p,
+.hero-deal-card p {
+  margin: 18px 0 0;
+  color: var(--benefy-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.hero-deal-card h3 { margin: 0 0 4px; font-size: 20px; }
+.hero-deal-store { display: block; margin-bottom: 19px; color: var(--benefy-muted); font-size: 13px; }
+.hero-deal-card del { display: block; color: var(--benefy-muted); font: 550 15px/1 Inter,Arial,sans-serif; }
+.hero-deal-card small { display: block; margin: 8px 0 3px; color: var(--benefy-muted); }
+.hero-deal-price { display: block; color: var(--benefy-blue); font: 850 34px/1 Inter,Arial,sans-serif; letter-spacing: -.04em; }
+.hero-saving { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding: 11px 13px; border-radius: 16px; background: rgba(67,211,158,.09); color: #82e5bd; }
+.hero-saving b { font: 800 18px/1 Inter,Arial,sans-serif; }
+
+.hero-metrics {
+  position: absolute;
+  z-index: 13;
+  left: 50%;
+  bottom: 76px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  width: min(760px, calc(100% - 40px));
+  padding: 18px 10px;
+  border-top: 1px solid var(--benefy-border);
+  border-bottom: 1px solid var(--benefy-border);
+  transform: translateX(-50%);
+}
+
+.hero-metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 8px 24px;
+  text-align: center;
+}
+
+.hero-metrics article + article { border-inline-start: 1px solid var(--benefy-border); }
+.hero-metrics strong { color: var(--benefy-text); font-size: 18px; font-weight: 800; }
+.hero-metrics span { color: var(--benefy-muted); font-size: 12px; }
+
+.hero-experience__chips { position: absolute; inset: 0; }
+.hero-chip {
+  position: absolute;
+  padding: 8px 12px;
+  border: 1px solid var(--benefy-border);
+  border-radius: 999px;
+  color: var(--benefy-blue-strong);
+  background: color-mix(in srgb, var(--benefy-panel) 48%, transparent);
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+  backdrop-filter: blur(12px);
+  font-size: 11px;
+  font-weight: 650;
+  opacity: .13;
+  animation: heroChipFloat 7s ease-in-out infinite;
+}
+.hero-chip--1 { top: 24%; left: 23%; }
+.hero-chip--2 { top: 18%; right: 21%; animation-delay: -2s; }
+.hero-chip--3 { bottom: 30%; left: 21%; animation-delay: -4s; }
+.hero-chip--4 { bottom: 25%; right: 20%; animation-delay: -5.5s; }
+
+@keyframes heroCardFloat {
+  0%,100% { transform: translate3d(0,0,0); }
+  50% { transform: translate3d(0,-7px,0); }
+}
+
+@keyframes heroChipFloat {
+  0%,100% { transform: translate3d(0,0,0); }
+  50% { transform: translate3d(4px,-7px,0); }
+}
+
+:root[data-theme="light"] .hero-benefits-card,
+:root[data-theme="light"] .hero-deal-card {
+  background: rgba(255,255,255,.64);
+  box-shadow: 0 28px 75px rgba(35,68,101,.13), 0 0 38px rgba(121,184,242,.06), inset 0 1px rgba(255,255,255,.92);
+}
+
+:root[data-theme="light"] .hero-chip { background: rgba(255,255,255,.52); }
+
+@media(max-width:1180px) {
+  .hero-benefits-card,
+  .hero-deal-card { width: 235px; opacity: .7; }
+  .hero-benefits-card { left: -65px; }
+  .hero-deal-card { right: -65px; }
+}
+
+@media(max-width:850px) {
+  .hero-premium--experience { min-height: 780px; padding-bottom: 205px; }
+  .hero-benefits-card,
+  .hero-deal-card { display: none; }
+  .hero-metrics { bottom: 58px; }
+}
+
+@media(max-width:620px) {
+  .hero-premium--experience { min-height: 760px; padding-bottom: 270px; }
+  .hero-metrics { grid-template-columns: 1fr; bottom: 38px; width: calc(100% - 28px); }
+  .hero-metrics article + article { border-inline-start: 0; border-top: 1px solid var(--benefy-border); }
+  .hero-chip { display: none; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .hero-benefits-card,.hero-deal-card,.hero-chip { animation: none; }
+}
