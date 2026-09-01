@@ -10,7 +10,7 @@ import './benefy-header-scroll-shell.css';
 import './benefy-header-glass.css';
 import './benefy-search-dark.css';
 import './benefy-hero-experience.css';
-import './benefy-hero-wallet.css';
+import './benefy-hero-wallet-v2.css';
 import './benefy-hero-backlights.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
