@@ -1,44 +1,33 @@
-// Makes the BENEFY header logo return to the Search/Home page.
-// Uses the existing Search navigation button, so React remains the source of truth.
+// BENEFY logo home behavior v2.
+// A logo click performs a true clean return to the homepage by reloading the root URL.
+// The existing authenticated session, language and theme remain preserved by Supabase/localStorage.
 export function enableLogoHome() {
   let observer;
 
-  function goHome(event) {
+  function goToFreshHome(event) {
     event?.preventDefault();
 
-    const searchButton = [...document.querySelectorAll('.topbar .nav-3d button')]
-      .find(button => {
-        const text = button.textContent?.trim().toLowerCase() || '';
-        return text.includes('חיפוש') || text.includes('search');
-      });
-
-    if (searchButton) {
-      searchButton.click();
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      return;
-    }
-
-    // Safe fallback if the navigation has not rendered yet.
-    window.location.assign('/');
+    // A full navigation resets temporary React state such as:
+    // query, search results, search errors, selected tab and opened feature pages.
+    const homeUrl = new URL('/', window.location.origin);
+    window.location.assign(homeUrl.href);
   }
 
   function enhance() {
     const logo = document.querySelector('.topbar > .site-logo');
-    if (!logo || logo.dataset.homeEnabled === 'true') return;
+    if (!logo || logo.dataset.homeEnabled === 'fresh-home') return;
 
-    logo.dataset.homeEnabled = 'true';
+    logo.dataset.homeEnabled = 'fresh-home';
     logo.setAttribute('role', 'link');
     logo.setAttribute('tabindex', '0');
-    logo.setAttribute('aria-label', 'BENEFY Home');
-    logo.title = document.documentElement.lang === 'en' ? 'Back to home' : 'חזרה לדף הבית';
+    logo.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Open BENEFY home page' : 'פתיחת דף הבית של BENEFY');
+    logo.title = document.documentElement.lang === 'en' ? 'Back to BENEFY home' : 'חזרה לדף הבית';
 
-    logo.addEventListener('click', goHome);
+    logo.addEventListener('click', goToFreshHome);
     logo.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        goHome(event);
+        goToFreshHome(event);
       }
     });
   }
