@@ -12,6 +12,7 @@ import './benefy-search-dark.css';
 import './benefy-hero-experience.css';
 import './benefy-hero-wallet-v2.css';
 import './benefy-hero-backlights.css';
+import './benefy-hero-stats.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
@@ -23,6 +24,7 @@ import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableHeroExperience } from './heroExperience';
 import { enableHeroWalletVisual } from './heroWalletVisual';
+import { enableHeroStatsVisual } from './heroStatsVisual';
 import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
@@ -31,26 +33,14 @@ import { enableSiteFooter } from './siteFooter';
 function Root() {
   useEffect(() => {
     const cleanups = [
-      enableCompactHeader(),
-      enableProfilePopover(),
-      enableAuthShowcase(),
-      enableAuthControls(),
-      enableHeroExperience(),
-      enableHeroWalletVisual(),
-      enableNavFeatures(),
-      enableNavIndicator(),
-      enableWalletExperience(),
-      enableSiteFooter()
+      enableCompactHeader(), enableProfilePopover(), enableAuthShowcase(),
+      enableAuthControls(), enableHeroExperience(), enableHeroWalletVisual(),
+      enableHeroStatsVisual(), enableNavFeatures(), enableNavIndicator(),
+      enableWalletExperience(), enableSiteFooter()
     ];
-
     return () => cleanups.forEach(cleanup => cleanup?.());
   }, []);
-
   return <App />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
-);
+ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><Root /></React.StrictMode>);
