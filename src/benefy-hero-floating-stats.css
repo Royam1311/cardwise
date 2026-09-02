@@ -1,0 +1,168 @@
+/* BENEFY compact floating hero statistics */
+
+/* Avoid duplicating the same 50+/25+ information below the search on desktop. */
+.hero-premium--experience > .hero-metrics {
+  display: none !important;
+}
+
+.hero-premium--experience {
+  min-height: 825px !important;
+  padding-bottom: 112px !important;
+}
+
+/* The former deal-card container becomes an invisible positioning layer. */
+.hero-deal-card.hero-floating-stats {
+  position: absolute !important;
+  z-index: 9 !important;
+  top: 292px !important;
+  right: clamp(22px, 4.6vw, 86px) !important;
+  width: 370px !important;
+  min-height: 400px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none;
+}
+
+.hero-floating-stat {
+  position: absolute;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  min-width: 190px;
+  min-height: 92px;
+  padding: 14px 17px;
+  border: 1px solid rgba(207,231,255,.12);
+  border-radius: 22px;
+  color: var(--benefy-text);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(83,205,195,.10), transparent 42%),
+    rgba(23,28,34,.70);
+  box-shadow:
+    0 22px 62px rgba(0,0,0,.34),
+    0 0 32px rgba(83,205,195,.035),
+    inset 0 1px rgba(255,255,255,.045);
+  backdrop-filter: blur(22px) saturate(120%);
+  -webkit-backdrop-filter: blur(22px) saturate(120%);
+  pointer-events: none;
+}
+
+.hero-floating-stat__icon {
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(83,205,195,.14);
+  border-radius: 14px;
+  color: #81ded2;
+  background: rgba(83,205,195,.09);
+  font: 800 17px/1 Inter,Arial,sans-serif;
+}
+
+.hero-floating-stat strong {
+  align-self: end;
+  color: #d7ebff;
+  font: 880 27px/1 Inter,Arial,sans-serif;
+  letter-spacing: -.04em;
+  white-space: nowrap;
+}
+
+.hero-floating-stat small {
+  align-self: start;
+  margin-top: 6px;
+  color: var(--benefy-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Intentionally asymmetric composition, inspired by premium floating UI. */
+.hero-floating-stat--stores {
+  top: 12px;
+  right: 6px;
+  transform: rotate(3deg);
+  animation: floatingStatA 9s ease-in-out infinite;
+}
+
+.hero-floating-stat--clubs {
+  top: 132px;
+  right: 116px;
+  transform: rotate(-3deg);
+  animation: floatingStatB 10.5s ease-in-out infinite -3.5s;
+}
+
+.hero-floating-stat--savings {
+  top: 255px;
+  right: 22px;
+  min-width: 235px;
+  transform: rotate(2deg);
+  animation: floatingStatC 11.5s ease-in-out infinite -6s;
+}
+
+.hero-floating-stat--savings .hero-floating-stat__icon {
+  color: #b5d7ff;
+  border-color: rgba(140,191,247,.15);
+  background: rgba(140,191,247,.09);
+}
+
+.hero-floating-stat--savings strong {
+  color: #8be1d4;
+  font-size: 25px;
+}
+
+@keyframes floatingStatA {
+  0%,100% { translate: 0 0; }
+  50% { translate: -5px -7px; }
+}
+
+@keyframes floatingStatB {
+  0%,100% { translate: 0 0; }
+  50% { translate: 7px -5px; }
+}
+
+@keyframes floatingStatC {
+  0%,100% { translate: 0 0; }
+  50% { translate: -4px 7px; }
+}
+
+:root[data-theme="light"] .hero-floating-stat {
+  border-color: rgba(62,143,216,.12);
+  background:
+    radial-gradient(circle at 90% 0%,rgba(76,190,182,.13),transparent 43%),
+    rgba(255,255,255,.68);
+  box-shadow:
+    0 20px 55px rgba(35,68,101,.14),
+    0 0 28px rgba(76,190,182,.04),
+    inset 0 1px rgba(255,255,255,.94);
+}
+
+:root[data-theme="light"] .hero-floating-stat strong { color:#315c87; }
+:root[data-theme="light"] .hero-floating-stat--savings strong { color:#248e83; }
+
+@media(max-width:1180px) {
+  .hero-deal-card.hero-floating-stats {
+    right:-72px !important;
+    opacity:.76;
+    transform:scale(.9) !important;
+    transform-origin:center right !important;
+  }
+}
+
+@media(max-width:850px) {
+  .hero-deal-card.hero-floating-stats { display:none !important; }
+  .hero-premium--experience { min-height:760px !important;padding-bottom:205px !important; }
+  .hero-premium--experience > .hero-metrics { display:grid !important; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .hero-floating-stat { animation:none !important; }
+}
