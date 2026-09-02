@@ -8,6 +8,7 @@ import './benefy-typography.css';
 import './benefy-header-v5.css';
 import './benefy-header-scroll-shell.css';
 import './benefy-header-glass.css';
+import './benefy-logo-home.css';
 import './benefy-search-dark.css';
 import './benefy-hero-experience.css';
 import './benefy-hero-wallet-v2.css';
@@ -22,6 +23,7 @@ import './benefy-footer-v3.css';
 import './benefy-homepage-refinement.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
+import { enableLogoHome } from './logoHome';
 import { enableAuthShowcase } from './authShowcase';
 import { enableAuthControls } from './authControls';
 import { enableHeroExperience } from './heroExperience';
@@ -37,6 +39,7 @@ function Root() {
     const cleanups = [
       enableCompactHeader(),
       enableProfilePopover(),
+      enableLogoHome(),
       enableAuthShowcase(),
       enableAuthControls(),
       enableHeroExperience(),
