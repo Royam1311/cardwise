@@ -1,5 +1,5 @@
-// BENEFY logo home behavior v3.
-// Clears the current search state and returns to a fresh Search tab without reloading the site.
+// BENEFY logo home behavior v4.
+// Requests a React-owned reset and never removes React DOM nodes directly.
 export function enableLogoHome() {
   let observer;
 
@@ -10,55 +10,29 @@ export function enableLogoHome() {
     });
   }
 
-  function clearReactInput(input) {
-    if (!input) return;
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-    if (setter) setter.call(input, '');
-    else input.value = '';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  function clearSearchView() {
-    const input = document.querySelector('.hero-premium input');
-    clearReactInput(input);
-
-    // Clear the currently rendered temporary search UI without touching saved data.
-    document.querySelectorAll(
-      '.results-premium .warning, .results-premium .product-card, .results-premium > main, .results-premium .welcome-card'
-    ).forEach(element => element.remove());
-
-    // Restore the initial homepage prompt state through a fresh in-app render signal.
-    window.dispatchEvent(new CustomEvent('benefy:reset-search'));
-  }
-
-  function goToFreshSearch(event) {
+  function goHome(event) {
     event?.preventDefault();
-
-    const searchButton = findSearchButton();
-    searchButton?.click();
-
-    window.requestAnimationFrame(() => {
-      clearSearchView();
+    window.dispatchEvent(new CustomEvent('benefy:reset-search'));
+    findSearchButton()?.click();
+    requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      requestAnimationFrame(() => document.querySelector('.hero-premium input')?.focus());
     });
   }
 
   function enhance() {
-    const logo = document.querySelector('.topbar > .site-logo');
-    if (!logo || logo.dataset.homeEnabled === 'fresh-search') return;
-
-    logo.dataset.homeEnabled = 'fresh-search';
-    logo.setAttribute('role', 'link');
-    logo.setAttribute('tabindex', '0');
-    logo.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Clear search and open home' : 'נקה את החיפוש וחזור לדף הבית');
-    logo.title = document.documentElement.lang === 'en' ? 'Clear search and return home' : 'נקה חיפוש וחזור לדף הבית';
-
-    logo.addEventListener('click', goToFreshSearch);
-    logo.addEventListener('keydown', event => {
+    const logoElement = document.querySelector('.topbar > .site-logo');
+    if (!logoElement || logoElement.dataset.homeEnabled === 'react-safe-search') return;
+    logoElement.dataset.homeEnabled = 'react-safe-search';
+    logoElement.setAttribute('role', 'link');
+    logoElement.setAttribute('tabindex', '0');
+    logoElement.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Clear search and open home' : 'נקה את החיפוש וחזור לדף הבית');
+    logoElement.title = document.documentElement.lang === 'en' ? 'Clear search and return home' : 'נקה חיפוש וחזור לדף הבית';
+    logoElement.addEventListener('click', goHome);
+    logoElement.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        goToFreshSearch(event);
+        goHome(event);
       }
     });
   }
@@ -66,6 +40,5 @@ export function enableLogoHome() {
   enhance();
   observer = new MutationObserver(enhance);
   observer.observe(document.body, { childList: true, subtree: true });
-
   return () => observer?.disconnect();
 }
