@@ -13,6 +13,7 @@ import './benefy-hero-experience.css';
 import './benefy-hero-wallet-v2.css';
 import './benefy-hero-backlights.css';
 import './benefy-hero-floating-stats.css';
+import './benefy-hero-clean-background.css';
 import './benefy-auth-showcase-v9.css';
 import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
