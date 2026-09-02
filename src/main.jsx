@@ -19,6 +19,7 @@ import './benefy-nav-features.css';
 import './benefy-nav-indicator.css';
 import './benefy-wallet-experience.css';
 import './benefy-footer-v3.css';
+import './benefy-homepage-refinement.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableAuthShowcase } from './authShowcase';
