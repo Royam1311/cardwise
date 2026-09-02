@@ -1,0 +1,144 @@
+/* BENEFY Hero Clean Background v1
+   1. Places all teal backlights beneath every floating object.
+   2. Removes the tiny floating benefit chips completely.
+   Visual-only override. */
+
+.hero-premium--experience {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Remove the small floating labels such as:
+   MAX BACK 150, Ashmoret 8%, Haver 7%, HitechZone 12%. */
+.hero-experience__chips,
+.hero-chip,
+.hero-chip--1,
+.hero-chip--2,
+.hero-chip--3,
+.hero-chip--4 {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+/* The experience layer itself stays below all real hero content. */
+.hero-premium--experience .hero-experience {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* Create the teal backlights as true background layers. */
+.hero-premium--experience .hero-experience::before,
+.hero-premium--experience .hero-experience::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 46%;
+  width: clamp(360px, 31vw, 620px);
+  height: clamp(430px, 48vw, 760px);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(58px);
+  opacity: .82;
+}
+
+/* Left backlight sits behind the wallet. */
+.hero-premium--experience .hero-experience::before {
+  left: clamp(-260px, -13vw, -120px);
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(58, 196, 186, .19) 0%,
+      rgba(58, 196, 186, .105) 30%,
+      rgba(63, 154, 167, .045) 53%,
+      transparent 74%
+    );
+  transform: translateY(-50%) rotate(-9deg);
+}
+
+/* Right backlight sits behind the floating statistics. */
+.hero-premium--experience .hero-experience::after {
+  right: clamp(-260px, -13vw, -120px);
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(58, 196, 186, .175) 0%,
+      rgba(58, 196, 186, .095) 31%,
+      rgba(63, 154, 167, .04) 54%,
+      transparent 74%
+    );
+  transform: translateY(-50%) rotate(9deg);
+}
+
+/* Explicit stacking order: light first, then objects, then central content. */
+.hero-benefits-card.hero-wallet-visual,
+.hero-deal-card.hero-floating-stats {
+  position: absolute !important;
+  z-index: 6 !important;
+}
+
+.hero-premium--experience > span,
+.hero-premium--experience > h1,
+.hero-premium--experience > form,
+.hero-premium--experience > .hero-metrics {
+  position: relative;
+  z-index: 10 !important;
+}
+
+/* Retain the preferred soft top light without introducing side panels. */
+.hero-premium--experience {
+  background:
+    radial-gradient(
+      ellipse 70% 44% at 50% 5%,
+      rgba(140, 191, 247, .105) 0%,
+      rgba(109, 135, 201, .048) 43%,
+      transparent 75%
+    ),
+    linear-gradient(180deg, rgba(25, 29, 34, .07), transparent 58%) !important;
+}
+
+:root[data-theme="light"] .hero-premium--experience .hero-experience::before,
+:root[data-theme="light"] .hero-premium--experience .hero-experience::after {
+  opacity: .68;
+  filter: blur(64px);
+}
+
+:root[data-theme="light"] .hero-premium--experience .hero-experience::before {
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(54, 180, 171, .17) 0%,
+      rgba(54, 180, 171, .08) 34%,
+      transparent 74%
+    );
+}
+
+:root[data-theme="light"] .hero-premium--experience .hero-experience::after {
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(54, 180, 171, .155) 0%,
+      rgba(54, 180, 171, .072) 34%,
+      transparent 74%
+    );
+}
+
+@media (max-width: 850px) {
+  .hero-premium--experience .hero-experience::before,
+  .hero-premium--experience .hero-experience::after {
+    width: 380px;
+    height: 460px;
+    opacity: .52;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-premium--experience .hero-experience::before,
+  .hero-premium--experience .hero-experience::after {
+    display: none;
+  }
+}
