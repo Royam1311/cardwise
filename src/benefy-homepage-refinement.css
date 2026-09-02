@@ -1,0 +1,153 @@
+/* BENEFY Homepage Refinement v1
+   1. Removes the lower welcome prompt.
+   2. Pushes the footer below the initial viewport.
+   3. Upgrades the hero comparison badge.
+   Visual-only override. */
+
+/* Remove the lower prompt:
+   "המחיר האישי מתחיל כאן, חפש מוצר וקבל מחיר לאחר ההטבות שכבר יש לך". */
+.results-premium > .welcome-card.full-row {
+  display: none !important;
+}
+
+/* Keep an intentional content area below the hero so the footer is reached only by scrolling. */
+.results-premium {
+  min-height: clamp(320px, 48vh, 560px);
+}
+
+/* When search results exist, let the real content define the page height. */
+.results-premium:has(.product-card),
+.results-premium:has(.offer-card),
+.results-premium:has(.warning) {
+  min-height: auto;
+  padding-bottom: clamp(100px, 14vh, 180px);
+}
+
+/* Footer stays part of the page background, but begins below the initial frame. */
+.benefy-footer {
+  margin-top: clamp(190px, 27vh, 340px) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.results-premium:has(.product-card) + .benefy-footer,
+.results-premium:has(.offer-card) + .benefy-footer {
+  margin-top: clamp(90px, 12vh, 160px) !important;
+}
+
+/* Premium hero comparison badge */
+.hero-premium > span {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  margin-bottom: 30px;
+  padding: 9px 17px 9px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(140, 191, 247, .30) !important;
+  border-radius: 999px;
+  color: #b9dcff !important;
+  background:
+    linear-gradient(135deg, rgba(140, 191, 247, .12), rgba(103, 122, 196, .055)),
+    rgba(23, 28, 34, .56) !important;
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, .22),
+    0 0 32px rgba(140, 191, 247, .065),
+    inset 0 1px rgba(255, 255, 255, .065) !important;
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  font-size: 14px;
+  font-weight: 760;
+  letter-spacing: -.01em;
+  transition:
+    border-color .28s ease,
+    background .28s ease,
+    box-shadow .28s ease,
+    transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero-premium > span::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -80%;
+  left: -18%;
+  width: 34%;
+  height: 260%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+  transform: rotate(22deg);
+  animation: heroBadgeShine 8s ease-in-out infinite;
+}
+
+.hero-premium > span::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #74d4c5;
+  box-shadow: 0 0 12px rgba(116, 212, 197, .62);
+}
+
+.hero-premium > span svg {
+  width: 19px;
+  height: 19px;
+  color: #8cbff7;
+  filter: drop-shadow(0 0 8px rgba(140, 191, 247, .35));
+}
+
+.hero-premium > span:hover {
+  transform: translateY(-2px);
+  border-color: rgba(140, 191, 247, .48) !important;
+  background:
+    linear-gradient(135deg, rgba(140, 191, 247, .17), rgba(103, 122, 196, .08)),
+    rgba(23, 28, 34, .62) !important;
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, .26),
+    0 0 38px rgba(140, 191, 247, .09),
+    inset 0 1px rgba(255, 255, 255, .08) !important;
+}
+
+:root[data-theme="light"] .hero-premium > span {
+  color: #326fa8 !important;
+  border-color: rgba(62, 143, 216, .24) !important;
+  background:
+    linear-gradient(135deg, rgba(140, 191, 247, .16), rgba(112, 139, 208, .06)),
+    rgba(255,255,255,.70) !important;
+  box-shadow:
+    0 14px 36px rgba(35, 68, 101, .12),
+    inset 0 1px rgba(255,255,255,.92) !important;
+}
+
+@keyframes heroBadgeShine {
+  0%, 72%, 100% { transform: translateX(-120%) rotate(22deg); opacity: 0; }
+  80% { opacity: 1; }
+  92% { transform: translateX(430%) rotate(22deg); opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .results-premium {
+    min-height: 230px;
+  }
+
+  .benefy-footer {
+    margin-top: 110px !important;
+  }
+
+  .hero-premium > span {
+    min-height: 42px;
+    margin-bottom: 24px;
+    padding: 8px 14px 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-premium > span::before {
+    animation: none;
+  }
+}
