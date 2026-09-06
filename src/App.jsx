@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Search, CreditCard, LogOut, Plus, Trash2, ShieldCheck, Sparkles,
   User, Tag, Settings, Store, Package, Percent, Check, Wifi,
-  ExternalLink, ImageOff, RefreshCw, Languages, Moon, Sun
+  ExternalLink, ImageOff, RefreshCw, Languages, Moon, Sun,
+  ChevronLeft, X
 } from 'lucide-react';
 import { supabase, configured } from './supabase';
 import { translations } from './translations';
+import './benefy-catalog-results.css';
 
 const FALLBACK_CARDS = [
   ['visa', 'Visa רגיל'], ['tav', 'תו הזהב'], ['htz', 'הייטקזון'],
@@ -109,11 +111,16 @@ function WalletCard({ code, name, selected, onToggle, t }) {
   </button>;
 }
 
-function ProductVisual({ image, name, t }) {
+function ProductVisual({ image, name, t, compact = false }) {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => setFailed(false), [image]);
+
   return !image || failed
-    ? <div className="product-visual product-visual--empty"><ImageOff /><span>{t.imagePending}</span></div>
-    : <div className="product-visual"><img src={image} alt={name} onError={() => setFailed(true)} /></div>;
+    ? <div className={`product-visual product-visual--empty ${compact ? 'product-visual--compact' : ''}`}><ImageOff /><span>{t.imagePending}</span></div>
+    : <div className={`product-visual ${compact ? 'product-visual--compact' : ''}`}>
+        <img src={image} alt={name} referrerPolicy="no-referrer" loading="lazy" onError={() => setFailed(true)} />
+      </div>;
 }
 
 function Admin({ t }) {
@@ -139,11 +146,27 @@ export default function App() {
   const [cardCatalog, setCardCatalog] = useState(FALLBACK_CARDS), [query, setQuery] = useState(''), [tab, setTab] = useState('search');
   const [loading, setLoading] = useState(true), [isAdmin, setIsAdmin] = useState(false), [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(''), [product, setProduct] = useState(null), [offers, setOffers] = useState([]), [hasSearched, setHasSearched] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [language, setLanguage] = useState(() => readPreference('benefy-language', 'he'));
   const [theme, setTheme] = useState(() => readPreference('benefy-theme', 'light'));
   const t = translations[language] || translations.he;
 
-  // React-safe reset triggered by clicking the BENEFY logo.
+  const copy = useMemo(() => language === 'he' ? {
+    results: 'מוצרים שנמצאו',
+    choose: 'בחרו מוצר כדי להשוות מחירים והטבות',
+    select: 'הצג מחיר',
+    back: 'חזרה לכל התוצאות',
+    source: 'המידע והמחיר מגיעים מהמקור',
+    exactSku: 'התאמה מדויקת למק״ט'
+  } : {
+    results: 'Products found',
+    choose: 'Choose a product to compare prices and benefits',
+    select: 'View price',
+    back: 'Back to all results',
+    source: 'Product data and price come from the source',
+    exactSku: 'Exact SKU match'
+  }, [language]);
+
   useEffect(() => {
     function resetSearch() {
       setTab('search');
@@ -151,6 +174,7 @@ export default function App() {
       setSearchError('');
       setProduct(null);
       setOffers([]);
+      setSearchResults([]);
       setHasSearched(false);
       setSearching(false);
     }
@@ -210,28 +234,37 @@ export default function App() {
     } catch { return null; }
   }
 
-  async function searchProducts(event) {
-    event?.preventDefault();
-    const term = query.trim();
-    setHasSearched(true); setSearchError(''); setProduct(null); setOffers([]);
-    if (!term) return setSearchError(t.emptySearch);
-    if (!configured || demo) return setSearchError(t.liveOnly);
+  async function loadProductOffers(foundProduct) {
     setSearching(true);
+    setSearchError('');
+    setProduct(null);
+    setOffers([]);
 
-    const { data: found, error: productError } = await supabase.from('products').select('id,product_name,sku,category,image_url').eq('active', true).or(`product_name.ilike.%${term}%,sku.ilike.%${term}%,category.ilike.%${term}%`).limit(1);
-    if (productError || !found?.length) { setSearching(false); return setSearchError(productError?.message || t.notFound); }
-    const foundProduct = found[0];
-    const { data: prices, error: priceError } = await supabase.from('prices').select('id,store_id,price,shipping,updated_at,product_url').eq('product_id', foundProduct.id).eq('active', true);
-    if (priceError) { setSearching(false); return setSearchError(priceError.message); }
+    const { data: prices, error: priceError } = await supabase
+      .from('prices')
+      .select('id,store_id,price,shipping,updated_at,product_url')
+      .eq('product_id', foundProduct.id)
+      .eq('active', true);
+
+    if (priceError) {
+      setSearching(false);
+      return setSearchError(priceError.message);
+    }
+
     const ids = [...new Set((prices || []).map(x => x.store_id).filter(Boolean))];
-    const storeResponse = ids.length ? await supabase.from('stores').select('id,store_name,website').in('id', ids) : { data: [] };
+    const storeResponse = ids.length
+      ? await supabase.from('stores').select('id,store_name,website').in('id', ids)
+      : { data: [] };
+
     let benefitRules = [];
     if (ids.length && cards.length) {
       const { data } = await supabase.from('benefit_rules').select('*').in('program_code', cards).in('store_id', ids).eq('active', true);
       benefitRules = data || [];
     }
+
     const image = foundProduct.image_url || await inspect(prices?.[0]?.product_url);
     setProduct({ ...foundProduct, image_url: image });
+
     const now = Date.now();
     const isActive = rule => (!rule.start_date || new Date(rule.start_date) <= now) && (!rule.end_date || new Date(rule.end_date) >= now);
     const calculate = (price, rule) => {
@@ -245,17 +278,78 @@ export default function App() {
       const deferred = ['cashback', 'loaded_card', 'voucher'].includes(rule.benefit_type);
       return { saving, checkout: deferred ? price : price - saving, effective: price - saving };
     };
+
     const combined = (prices || []).map(row => {
       const store = (storeResponse.data || []).find(x => x.id === row.store_id);
       const price = Number(row.price || 0), shipping = Number(row.shipping || 0);
-      const best = benefitRules.filter(r => r.store_id === row.store_id && isActive(r)).map(rule => ({ rule, result: calculate(price, rule) })).filter(x => x.result).sort((a, b) => a.result.effective - b.result.effective)[0];
+      const best = benefitRules
+        .filter(r => r.store_id === row.store_id && isActive(r))
+        .map(rule => ({ rule, result: calculate(price, rule) }))
+        .filter(x => x.result)
+        .sort((a, b) => a.result.effective - b.result.effective)[0];
       const effective = best?.result.effective ?? price;
       const programName = best ? (cardCatalog.find(x => x[0] === best.rule.program_code)?.[1] || best.rule.program_code) : null;
-      return { id: row.id, store: store?.store_name || t.stores, website: row.product_url || store?.website || null, price, shipping, effective, checkout: best?.result.checkout ?? price, total: effective + shipping, saving: best?.result.saving || 0, benefit: best?.rule || null, note: best ? `${programName}: ${best.rule.title || t.activeBenefit}` : t.basePrice };
+      return {
+        id: row.id,
+        store: store?.store_name || t.stores,
+        website: row.product_url || store?.website || null,
+        price,
+        shipping,
+        effective,
+        checkout: best?.result.checkout ?? price,
+        total: effective + shipping,
+        saving: best?.result.saving || 0,
+        benefit: best?.rule || null,
+        updatedAt: row.updated_at,
+        note: best ? `${programName}: ${best.rule.title || t.activeBenefit}` : t.basePrice
+      };
     }).sort((a, b) => a.total - b.total);
+
     setOffers(combined);
     if (!combined.length) setSearchError(t.noPrices);
     setSearching(false);
+    window.setTimeout(() => document.querySelector('.results-premium')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  async function searchProducts(event) {
+    event?.preventDefault();
+    const term = query.trim();
+    setHasSearched(true);
+    setSearchError('');
+    setProduct(null);
+    setOffers([]);
+    setSearchResults([]);
+
+    if (!term) return setSearchError(t.emptySearch);
+    if (!configured || demo) return setSearchError(t.liveOnly);
+
+    setSearching(true);
+    const safeTerm = term.replace(/[,%()]/g, ' ').trim();
+    const { data: found, error: productError } = await supabase
+      .from('products')
+      .select('id,product_name,sku,category,image_url')
+      .eq('active', true)
+      .or(`product_name.ilike.%${safeTerm}%,sku.ilike.%${safeTerm}%,category.ilike.%${safeTerm}%`)
+      .limit(48);
+
+    if (productError || !found?.length) {
+      setSearching(false);
+      return setSearchError(productError?.message || t.notFound);
+    }
+
+    const ranked = [...found].sort((a, b) => {
+      const aExact = String(a.sku || '').toLowerCase() === safeTerm.toLowerCase() ? 1 : 0;
+      const bExact = String(b.sku || '').toLowerCase() === safeTerm.toLowerCase() ? 1 : 0;
+      if (aExact !== bExact) return bExact - aExact;
+      return String(a.product_name || '').localeCompare(String(b.product_name || ''), language === 'he' ? 'he' : 'en');
+    });
+
+    setSearchResults(ranked);
+    setSearching(false);
+
+    if (ranked.length === 1 || String(ranked[0]?.sku || '').toLowerCase() === safeTerm.toLowerCase()) {
+      await loadProductOffers(ranked[0]);
+    }
   }
 
   if (loading) return <div className="center">{t.loading}</div>;
@@ -266,6 +360,39 @@ export default function App() {
 
   return <div dir={language === 'he' ? 'rtl' : 'ltr'}>
     <header className="topbar"><AdaptiveLogo /><nav className="nav-3d">{tabs.map(([Icon, key, label]) => <button key={key} className={tab === key ? 'active' : ''} onClick={() => setTab(key)}><span className="nav-icon"><Icon /></span><span>{label}</span></button>)}</nav><div className="header-actions"><button className="header-control" onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}><Languages /><span>{t.languageButton}</span></button><button className="header-control theme-control" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon /> : <Sun />}</button><div className="user"><User />{email}<button onClick={() => session ? supabase.auth.signOut() : setDemo(false)}><LogOut /></button></div></div></header>
-    {tab === 'admin' ? <Admin t={t} /> : tab === 'cards' ? <section className="page"><div className="wallet-heading"><div><h1>{t.wallet}</h1><p>{t.walletText}</p></div><div className="wallet-counter"><CreditCard /><strong>{cards.length}</strong> {t.activePrograms}</div></div><div className="wallet-grid">{cardCatalog.map(([code, name]) => <WalletCard key={code} code={code} name={name} selected={cards.includes(code)} onToggle={() => toggleCard(code)} t={t} />)}</div></section> : <><section className="hero-premium"><span><Sparkles />{t.heroBadge}</span><h1>{t.heroLine1}<br />{t.heroLine2}</h1><form onSubmit={searchProducts}><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.placeholder} /><button className="primary search-3d" disabled={searching}>{searching ? t.searching : t.compare}</button></form></section><section className="page results-premium">{searchError && <div className="warning full-row">{searchError}</div>}{!hasSearched && <div className="welcome-card full-row"><Sparkles /><div><strong>{t.startTitle}</strong><span>{t.startText}</span></div></div>}{product && <><aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t} /><span className="category">{product.category || t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku || '-'}</p><div className="summary"><Tag />{t.activeCards}: {cards.length}</div></aside><main><h2>{t.foundPrices}</h2>{offers.map((offer, index) => <article className={`offer-card ${index === 0 ? 'best' : ''}`} key={offer.id}>{index === 0 && <b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{offer.store.slice(0, 1)}</div><div><h3>{offer.store}</h3><small><ShieldCheck />{t.source}</small></div></div><div className="price-block">{offer.saving > 0 && <del>{money(offer.price, language)}</del>}<strong>{money(offer.effective, language)}</strong><span>{offer.note}</span>{offer.saving > 0 && <p className="saving-line">{t.saving}: <b>{money(offer.saving, language)}</b>{offer.checkout !== offer.effective ? ` | ${t.checkout}: ${money(offer.checkout, language)}` : ''}</p>}{offer.benefit?.notes?.includes('TEST') && <p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {offer.shipping ? money(offer.shipping, language) : t.free} | {t.total}: <b>{money(offer.total, language)}</b></p></div>{offer.website ? <button className="store-button" onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>{t.storeButton}<ExternalLink /></button> : <button disabled>{t.noLink}</button>}</article>)}</main></>}</section></>}
+
+    {tab === 'admin' ? <Admin t={t} /> : tab === 'cards' ? <section className="page"><div className="wallet-heading"><div><h1>{t.wallet}</h1><p>{t.walletText}</p></div><div className="wallet-counter"><CreditCard /><strong>{cards.length}</strong> {t.activePrograms}</div></div><div className="wallet-grid">{cardCatalog.map(([code, name]) => <WalletCard key={code} code={code} name={name} selected={cards.includes(code)} onToggle={() => toggleCard(code)} t={t} />)}</div></section> : <>
+      <section className="hero-premium"><span><Sparkles />{t.heroBadge}</span><h1>{t.heroLine1}<br />{t.heroLine2}</h1><form onSubmit={searchProducts}><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.placeholder} /><button className="primary search-3d" disabled={searching}>{searching ? t.searching : t.compare}</button></form></section>
+
+      <section className={`page results-premium ${searchResults.length > 1 && !product ? 'results-premium--catalog' : ''}`}>
+        {searchError && <div className="warning full-row">{searchError}</div>}
+        {!hasSearched && <div className="welcome-card full-row"><Sparkles /><div><strong>{t.startTitle}</strong><span>{t.startText}</span></div></div>}
+
+        {searchResults.length > 1 && !product && <div className="catalog-results full-row">
+          <div className="catalog-results__header">
+            <div><h2>{copy.results} <span>{searchResults.length}</span></h2><p>{copy.choose}</p></div>
+            <button type="button" className="catalog-results__clear" onClick={() => { setQuery(''); setSearchResults([]); setHasSearched(false); }}><X /></button>
+          </div>
+          <div className="catalog-grid">
+            {searchResults.map(item => <article className="catalog-card" key={item.id}>
+              <ProductVisual image={item.image_url} name={item.product_name} t={t} compact />
+              <div className="catalog-card__body">
+                <span className="category">{item.category || t.noCategory}</span>
+                <h3>{item.product_name}</h3>
+                <p>{t.sku}: <b>{item.sku || '-'}</b></p>
+                <small><ShieldCheck />{copy.source}</small>
+              </div>
+              <button type="button" className="catalog-card__button" onClick={() => loadProductOffers(item)}>{copy.select}<ChevronLeft /></button>
+            </article>)}
+          </div>
+        </div>}
+
+        {product && <>
+          {searchResults.length > 1 && <button type="button" className="catalog-back full-row" onClick={() => { setProduct(null); setOffers([]); setSearchError(''); }}><ChevronLeft />{copy.back}</button>}
+          <aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t} /><span className="category">{product.category || t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku || '-'}</p><div className="summary"><Tag />{t.activeCards}: {cards.length}</div></aside>
+          <main><h2>{t.foundPrices}</h2>{offers.map((offer, index) => <article className={`offer-card ${index === 0 ? 'best' : ''}`} key={offer.id}>{index === 0 && <b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{offer.store.slice(0, 1)}</div><div><h3>{offer.store}</h3><small><ShieldCheck />{t.source}</small></div></div><div className="price-block">{offer.saving > 0 && <del>{money(offer.price, language)}</del>}<strong>{money(offer.effective, language)}</strong><span>{offer.note}</span>{offer.saving > 0 && <p className="saving-line">{t.saving}: <b>{money(offer.saving, language)}</b>{offer.checkout !== offer.effective ? ` | ${t.checkout}: ${money(offer.checkout, language)}` : ''}</p>}{offer.benefit?.notes?.includes('TEST') && <p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {offer.shipping ? money(offer.shipping, language) : t.free} | {t.total}: <b>{money(offer.total, language)}</b></p></div>{offer.website ? <button className="store-button" onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>{t.storeButton}<ExternalLink /></button> : <button disabled>{t.noLink}</button>}</article>)}</main>
+        </>}
+      </section>
+    </>}
   </div>;
 }
