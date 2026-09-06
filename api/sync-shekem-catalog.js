@@ -1,43 +1,15 @@
 const FAST_SIMON_URL = 'https://api.fastsimon.com/full_text_search';
-const DEFAULT_TERMS = [
-  'טלפון',
-  'סמארטפון',
-  'טלוויזיה',
-  'מקרר',
-  'מקפיא',
-  'מכונת כביסה',
-  'מייבש כביסה',
-  'מדיח כלים',
-  'מזגן',
-  'שואב אבק',
-  'מחשב',
-  'טאבלט',
-  'אוזניות',
-  'רמקול',
-  'קונסולה',
-  'מיקרוגל',
-  'תנור',
-  'כיריים',
-  'מכונת קפה',
-  'בלנדר',
-  'מיקסר',
-  'גריל',
-  'מאוורר'
-];
+const DEFAULT_TERMS = ['samsung'];
 
 function getSupabaseUrl() {
   const value = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  if (!value) {
-    throw new Error('Missing environment variable: VITE_SUPABASE_URL');
-  }
+  if (!value) throw new Error('Missing environment variable: VITE_SUPABASE_URL');
   return value.replace(/\/$/, '');
 }
 
 function getServerKey() {
   const value = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!value) {
-    throw new Error('Missing server secret: SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY');
-  }
+  if (!value) throw new Error('Missing server secret: SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY');
   return value;
 }
 
@@ -48,9 +20,7 @@ function requiredEnv(name) {
 }
 
 function isEnabled(name) {
-  return ['1', 'true', 'yes', 'on'].includes(
-    String(process.env[name] || '').toLowerCase()
-  );
+  return ['1', 'true', 'yes', 'on'].includes(String(process.env[name] || '').toLowerCase());
 }
 
 function numberOrNull(value) {
@@ -77,7 +47,6 @@ function readAttribute(rawAttributes, names) {
 }
 
 function normalizeProduct(item) {
-  const comparePrice = numberOrNull(item.p_c);
   const price = numberOrNull(item.p);
   const productName = String(item.l || '').trim();
   const sku = String(item.sku || item.s || '').trim();
@@ -91,12 +60,13 @@ function normalizeProduct(item) {
       product_name: productName,
       sku,
       category,
-      image_url: item.t || item.t2 || null,
+      // Fast Simon's own thumbnail is preferred because it is intended for search-result rendering.
+      // The original Shekem image remains the fallback. No generated or synthetic image is used.
+      image_url: item.t2 || item.t || null,
       active: true
     },
     price: {
       price,
-      comparePrice: comparePrice && comparePrice > 0 ? comparePrice : null,
       productUrl: item.u || null
     }
   };
@@ -110,15 +80,13 @@ async function supabaseRequest(path, { method = 'GET', body, prefer } = {}) {
       apikey: key,
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
-      Prefer: prefer || (method === 'GET' ? 'return=representation' : 'return=representation')
+      Prefer: prefer || 'return=representation'
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   });
 
   const text = await response.text();
-  if (!response.ok) {
-    throw new Error(`Supabase ${response.status}: ${text}`);
-  }
+  if (!response.ok) throw new Error(`Supabase ${response.status}: ${text}`);
   return text ? JSON.parse(text) : [];
 }
 
@@ -149,17 +117,14 @@ async function findProductBySku(sku) {
 async function saveProduct(product) {
   const existing = await findProductBySku(product.sku);
   if (existing) {
-    const rows = await supabaseRequest(
-      `products?id=eq.${encodeURIComponent(existing.id)}`,
-      { method: 'PATCH', body: product }
-    );
+    const rows = await supabaseRequest(`products?id=eq.${encodeURIComponent(existing.id)}`, {
+      method: 'PATCH',
+      body: product
+    });
     return rows[0] || { ...existing, ...product };
   }
 
-  const rows = await supabaseRequest('products', {
-    method: 'POST',
-    body: product
-  });
+  const rows = await supabaseRequest('products', { method: 'POST', body: product });
   return rows[0];
 }
 
@@ -182,15 +147,11 @@ async function savePrice(productId, storeId, priceData) {
 
   if (existing[0]) {
     await supabaseRequest(`prices?id=eq.${encodeURIComponent(existing[0].id)}`, {
-      method: 'PATCH',
-      body: row,
-      prefer: 'return=minimal'
+      method: 'PATCH', body: row, prefer: 'return=minimal'
     });
   } else {
     await supabaseRequest('prices', {
-      method: 'POST',
-      body: row,
-      prefer: 'return=minimal'
+      method: 'POST', body: row, prefer: 'return=minimal'
     });
   }
 }
@@ -217,46 +178,28 @@ async function fetchSearchPage(term, page, productsPerPage) {
   const response = await fetch(`${FAST_SIMON_URL}?${params.toString()}`, {
     headers: { Accept: 'application/json' }
   });
-  if (!response.ok) {
-    throw new Error(`Fast Simon ${response.status}: ${term}, page ${page}`);
-  }
+  if (!response.ok) throw new Error(`Fast Simon ${response.status}: ${term}, page ${page}`);
   return response.json();
 }
 
 function isAuthorized(req) {
   const expected = process.env.CATALOG_SYNC_SECRET || process.env.CRON_SECRET;
   if (!expected) return false;
-  return (
-    req.headers.authorization === `Bearer ${expected}` ||
-    req.query?.secret === expected
-  );
+  return req.headers.authorization === `Bearer ${expected}` || req.query?.secret === expected;
 }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
-  if (!['GET', 'POST'].includes(req.method)) {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  if (!isAuthorized(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
+  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
   if (!isEnabled('SHEKEM_SYNC_ENABLED')) {
-    return res.status(503).json({
-      error: 'Shekem synchronization is disabled',
-      action: 'Set SHEKEM_SYNC_ENABLED=true after source-use authorization.'
-    });
+    return res.status(503).json({ error: 'Shekem synchronization is disabled' });
   }
 
   const terms = termsFromEnvironment();
-  const productsPerPage = Math.max(
-    1,
-    Math.min(Number(process.env.SHEKEM_PRODUCTS_PER_PAGE || 15), 50)
-  );
-  const maxPagesPerTerm = Math.max(
-    1,
-    Math.min(Number(process.env.SHEKEM_MAX_PAGES_PER_TERM || 25), 50)
-  );
+  const productsPerPage = Math.max(1, Math.min(Number(process.env.SHEKEM_PRODUCTS_PER_PAGE || 15), 50));
+  const maxPagesPerTerm = Math.max(1, Math.min(Number(process.env.SHEKEM_MAX_PAGES_PER_TERM || 3), 50));
   const delayMs = Math.max(500, Number(process.env.SHEKEM_REQUEST_DELAY_MS || 1200));
   const seenSkus = new Set();
   let pagesRequested = 0;
@@ -270,7 +213,6 @@ export default async function handler(req, res) {
 
     for (const term of terms) {
       let totalPages = 1;
-
       for (let page = 1; page <= Math.min(totalPages, maxPagesPerTerm); page += 1) {
         const payload = await fetchSearchPage(term, page, productsPerPage);
         pagesRequested += 1;
@@ -303,13 +245,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
+      imageSourcePriority: ['fast-simon-thumbnail', 'shekem-original'],
       pagesRequested,
       productsReceived,
       productsSaved,
       productsFailed,
       uniqueSkus: seenSkus.size,
-      completedAt: new Date().toISOString(),
-      note: 'Coverage is based on configured search terms, not an official full-catalog feed.'
+      completedAt: new Date().toISOString()
     });
   } catch (error) {
     return res.status(500).json({
