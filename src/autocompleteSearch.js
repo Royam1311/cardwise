@@ -1,334 +1,253 @@
 import { configured, supabase } from './supabase';
 
-const MIN_QUERY_LENGTH = 2;
-const RESULT_LIMIT = 10;
-const DEBOUNCE_MS = 280;
+const MIN_CHARS = 2;
+const LIMIT = 10;
+const DEBOUNCE_MS = 160;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const cache = new Map();
 
-function money(value) {
-  if (value === null || value === undefined || value === '') return '';
-  return new Intl.NumberFormat('he-IL', {
-    style: 'currency',
-    currency: 'ILS',
-    maximumFractionDigits: 0
-  }).format(Number(value));
-}
+const normalize = value => String(value || '')
+  .replace(/[,%()]/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
 
-function safeSearchTerm(value) {
-  return String(value || '')
-    .replace(/[,%()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+const money = value => value === null || value === undefined
+  ? ''
+  : new Intl.NumberFormat('he-IL', {
+      style: 'currency', currency: 'ILS', maximumFractionDigits: 0
+    }).format(Number(value));
 
-function setReactInputValue(input, value) {
-  const setter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype,
-    'value'
-  )?.set;
-
+function setReactValue(input, value) {
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
   if (setter) setter.call(input, value);
   else input.value = value;
-
   input.dispatchEvent(new Event('input', { bubbles: true }));
-  input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-async function findSuggestions(term) {
-  if (!configured || !supabase) return [];
-
-  const clean = safeSearchTerm(term);
-  if (clean.length < MIN_QUERY_LENGTH) return [];
+async function loadSuggestions(rawTerm) {
+  const term = normalize(rawTerm);
+  const key = term.toLocaleLowerCase('he-IL');
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.data;
 
   const { data: products, error } = await supabase
     .from('products')
     .select('id,product_name,sku,category,image_url')
     .eq('active', true)
-    .or([
-      `product_name.ilike.%${clean}%`,
-      `sku.ilike.%${clean}%`,
-      `category.ilike.%${clean}%`
-    ].join(','))
-    .limit(RESULT_LIMIT);
-
+    .or(`product_name.ilike.%${term}%,sku.ilike.%${term}%,category.ilike.%${term}%`)
+    .limit(LIMIT);
   if (error) throw error;
-  if (!products?.length) return [];
 
-  const ids = products.map(product => product.id);
-  const { data: prices } = await supabase
-    .from('prices')
-    .select('product_id,price,shipping,updated_at')
-    .in('product_id', ids)
-    .eq('active', true);
+  const rows = products || [];
+  const ids = rows.map(item => item.id);
+  let prices = [];
+  if (ids.length) {
+    const response = await supabase
+      .from('prices')
+      .select('product_id,price,shipping')
+      .in('product_id', ids)
+      .eq('active', true);
+    prices = response.data || [];
+  }
 
-  const bestPriceByProduct = new Map();
-  for (const row of prices || []) {
+  const best = new Map();
+  for (const row of prices) {
     const total = Number(row.price || 0) + Number(row.shipping || 0);
-    const existing = bestPriceByProduct.get(row.product_id);
-    if (!existing || total < existing.total) {
-      bestPriceByProduct.set(row.product_id, {
-        price: Number(row.price || 0),
-        total,
-        updatedAt: row.updated_at
-      });
+    if (!best.has(row.product_id) || total < best.get(row.product_id).total) {
+      best.set(row.product_id, { price: Number(row.price || 0), total });
     }
   }
 
-  const lower = clean.toLocaleLowerCase('he-IL');
-  return products
-    .map(product => ({
-      ...product,
-      price: bestPriceByProduct.get(product.id)?.price ?? null,
-      exactSku: String(product.sku || '').toLocaleLowerCase('he-IL') === lower,
-      startsWith: String(product.product_name || '').toLocaleLowerCase('he-IL').startsWith(lower)
-    }))
-    .sort((a, b) => {
-      if (a.exactSku !== b.exactSku) return a.exactSku ? -1 : 1;
-      if (a.startsWith !== b.startsWith) return a.startsWith ? -1 : 1;
-      return String(a.product_name || '').localeCompare(String(b.product_name || ''), 'he');
-    });
-}
+  const data = rows.map(item => ({
+    ...item,
+    price: best.get(item.id)?.price ?? null,
+    exactSku: String(item.sku || '').toLocaleLowerCase('he-IL') === key,
+    starts: String(item.product_name || '').toLocaleLowerCase('he-IL').startsWith(key)
+  })).sort((a, b) => {
+    if (a.exactSku !== b.exactSku) return a.exactSku ? -1 : 1;
+    if (a.starts !== b.starts) return a.starts ? -1 : 1;
+    return String(a.product_name || '').localeCompare(String(b.product_name || ''), 'he');
+  });
 
-function createSuggestionRow(product, index, onChoose) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'benefy-autocomplete__item';
-  button.dataset.index = String(index);
-  button.setAttribute('role', 'option');
-  button.setAttribute('aria-selected', 'false');
-
-  const imageBox = document.createElement('span');
-  imageBox.className = 'benefy-autocomplete__image';
-
-  if (product.image_url) {
-    const image = document.createElement('img');
-    image.src = product.image_url;
-    image.alt = '';
-    image.loading = 'lazy';
-    image.referrerPolicy = 'no-referrer';
-    image.addEventListener('error', () => {
-      image.remove();
-      imageBox.classList.add('is-empty');
-      imageBox.textContent = '◫';
-    }, { once: true });
-    imageBox.appendChild(image);
-  } else {
-    imageBox.classList.add('is-empty');
-    imageBox.textContent = '◫';
-  }
-
-  const details = document.createElement('span');
-  details.className = 'benefy-autocomplete__details';
-
-  const title = document.createElement('strong');
-  title.textContent = product.product_name || '';
-
-  const meta = document.createElement('span');
-  meta.className = 'benefy-autocomplete__meta';
-
-  const sku = document.createElement('span');
-  sku.textContent = `SKU ${product.sku || '-'}`;
-  meta.appendChild(sku);
-
-  if (product.category) {
-    const category = document.createElement('span');
-    category.textContent = product.category;
-    meta.appendChild(category);
-  }
-
-  details.append(title, meta);
-
-  const price = document.createElement('span');
-  price.className = 'benefy-autocomplete__price';
-  price.textContent = product.price !== null ? money(product.price) : 'מחיר בבחירה';
-
-  button.append(imageBox, details, price);
-  button.addEventListener('pointerdown', event => event.preventDefault());
-  button.addEventListener('click', () => onChoose(product));
-  return button;
+  cache.set(key, { at: Date.now(), data });
+  return data;
 }
 
 export function enableAutocompleteSearch() {
   if (!configured || !supabase) return () => {};
 
-  let input = null;
-  let form = null;
-  let panel = null;
-  let timer = null;
-  let requestSequence = 0;
+  let form;
+  let input;
+  let panel;
+  let timer;
+  let requestId = 0;
+  let results = [];
   let activeIndex = -1;
-  let currentResults = [];
-  let attached = false;
+  let attachedInput = null;
 
-  function closePanel() {
+  const close = () => {
     activeIndex = -1;
-    currentResults = [];
-    panel?.classList.remove('is-open', 'is-loading');
-    panel?.setAttribute('aria-hidden', 'true');
-    if (panel) panel.innerHTML = '';
+    results = [];
+    if (panel) {
+      panel.classList.remove('is-open', 'is-loading');
+      panel.replaceChildren();
+    }
     input?.setAttribute('aria-expanded', 'false');
-  }
+  };
 
-  function choose(product) {
-    if (!input || !form) return;
-    closePanel();
-    setReactInputValue(input, product.sku || product.product_name || '');
-    window.setTimeout(() => form.requestSubmit(), 0);
-  }
+  const choose = product => {
+    close();
+    setReactValue(input, product.sku || product.product_name);
+    requestAnimationFrame(() => form.requestSubmit());
+  };
 
-  function setActiveIndex(nextIndex) {
-    const items = [...(panel?.querySelectorAll('.benefy-autocomplete__item') || [])];
-    if (!items.length) return;
+  const makeItem = (product, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'benefy-autocomplete__item';
+    button.dataset.index = String(index);
+    button.setAttribute('role', 'option');
 
-    activeIndex = (nextIndex + items.length) % items.length;
-    items.forEach((item, index) => {
-      const selected = index === activeIndex;
-      item.classList.toggle('is-active', selected);
-      item.setAttribute('aria-selected', selected ? 'true' : 'false');
-      if (selected) item.scrollIntoView({ block: 'nearest' });
-    });
-  }
+    const media = document.createElement('span');
+    media.className = 'benefy-autocomplete__image';
+    if (product.image_url) {
+      const img = document.createElement('img');
+      img.src = product.image_url;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => { media.textContent = '◫'; media.classList.add('is-empty'); };
+      media.appendChild(img);
+    } else {
+      media.textContent = '◫';
+      media.classList.add('is-empty');
+    }
 
-  function renderResults(results, term) {
-    if (!panel || !input) return;
-    panel.innerHTML = '';
-    panel.classList.remove('is-loading');
+    const info = document.createElement('span');
+    info.className = 'benefy-autocomplete__details';
+    const title = document.createElement('strong');
+    title.textContent = product.product_name || '';
+    const meta = document.createElement('span');
+    meta.className = 'benefy-autocomplete__meta';
+    meta.textContent = `SKU ${product.sku || '-'}${product.category ? ` • ${product.category}` : ''}`;
+    info.append(title, meta);
+
+    const price = document.createElement('span');
+    price.className = 'benefy-autocomplete__price';
+    price.textContent = product.price === null ? 'בחר להצגת מחיר' : money(product.price);
+
+    button.append(media, info, price);
+    button.onpointerdown = event => event.preventDefault();
+    button.onclick = () => choose(product);
+    return button;
+  };
+
+  const render = (items, term) => {
+    if (!panel) return;
+    results = items;
     activeIndex = -1;
-    currentResults = results;
+    panel.replaceChildren();
+    panel.classList.remove('is-loading');
 
     const heading = document.createElement('div');
     heading.className = 'benefy-autocomplete__heading';
-    heading.textContent = results.length
-      ? `הצעות עבור “${term}”`
-      : `לא נמצאו הצעות עבור “${term}”`;
+    heading.textContent = items.length ? `הצעות עבור “${term}”` : `לא נמצאו הצעות עבור “${term}”`;
     panel.appendChild(heading);
 
-    if (results.length) {
-      const list = document.createElement('div');
-      list.className = 'benefy-autocomplete__list';
-      list.setAttribute('role', 'listbox');
-      results.forEach((product, index) => {
-        list.appendChild(createSuggestionRow(product, index, choose));
-      });
-      panel.appendChild(list);
+    for (const [index, product] of items.entries()) panel.appendChild(makeItem(product, index));
 
-      const footer = document.createElement('button');
-      footer.type = 'button';
-      footer.className = 'benefy-autocomplete__footer';
-      footer.textContent = `הצג את כל התוצאות עבור “${term}”`;
-      footer.addEventListener('pointerdown', event => event.preventDefault());
-      footer.addEventListener('click', () => {
-        closePanel();
-        form?.requestSubmit();
-      });
-      panel.appendChild(footer);
+    if (items.length) {
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'benefy-autocomplete__footer';
+      all.textContent = `הצג את כל התוצאות עבור “${term}”`;
+      all.onpointerdown = event => event.preventDefault();
+      all.onclick = () => { close(); form.requestSubmit(); };
+      panel.appendChild(all);
     }
 
     panel.classList.add('is-open');
-    panel.setAttribute('aria-hidden', 'false');
     input.setAttribute('aria-expanded', 'true');
-  }
+  };
 
-  async function search(value) {
-    const term = safeSearchTerm(value);
-    if (term.length < MIN_QUERY_LENGTH) return closePanel();
-
-    const sequence = ++requestSequence;
-    panel?.classList.add('is-open', 'is-loading');
-    panel?.setAttribute('aria-hidden', 'false');
-    if (panel) panel.innerHTML = '<div class="benefy-autocomplete__loading">מחפש בקטלוג...</div>';
-    input?.setAttribute('aria-expanded', 'true');
-
+  const run = async value => {
+    const term = normalize(value);
+    if (term.length < MIN_CHARS) return close();
+    const id = ++requestId;
+    panel.classList.add('is-open', 'is-loading');
+    panel.innerHTML = '<div class="benefy-autocomplete__loading">מחפש בקטלוג...</div>';
+    input.setAttribute('aria-expanded', 'true');
     try {
-      const results = await findSuggestions(term);
-      if (sequence !== requestSequence || input?.value.trim() !== value.trim()) return;
-      renderResults(results, term);
+      const items = await loadSuggestions(term);
+      if (id === requestId && normalize(input.value) === term) render(items, term);
     } catch (error) {
-      console.error('BENEFY autocomplete failed:', error);
-      if (sequence === requestSequence) closePanel();
+      console.error('Autocomplete error:', error);
+      if (id === requestId) close();
     }
-  }
+  };
 
-  function onInput() {
-    window.clearTimeout(timer);
-    const value = input?.value || '';
-    if (safeSearchTerm(value).length < MIN_QUERY_LENGTH) return closePanel();
-    timer = window.setTimeout(() => search(value), DEBOUNCE_MS);
-  }
+  const onInput = () => {
+    clearTimeout(timer);
+    const value = input.value;
+    if (normalize(value).length < MIN_CHARS) return close();
+    timer = setTimeout(() => run(value), DEBOUNCE_MS);
+  };
 
-  function onKeyDown(event) {
-    if (!panel?.classList.contains('is-open')) return;
+  const activate = index => {
+    const items = [...panel.querySelectorAll('.benefy-autocomplete__item')];
+    if (!items.length) return;
+    activeIndex = (index + items.length) % items.length;
+    items.forEach((node, i) => node.classList.toggle('is-active', i === activeIndex));
+    items[activeIndex].scrollIntoView({ block: 'nearest' });
+  };
 
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setActiveIndex(activeIndex + 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setActiveIndex(activeIndex - 1);
-    } else if (event.key === 'Enter' && activeIndex >= 0) {
-      event.preventDefault();
-      const selected = currentResults[activeIndex];
-      if (selected) choose(selected);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      closePanel();
-    }
-  }
+  const onKeyDown = event => {
+    if (!panel.classList.contains('is-open')) return;
+    if (event.key === 'ArrowDown') { event.preventDefault(); activate(activeIndex + 1); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); activate(activeIndex - 1); }
+    else if (event.key === 'Enter' && activeIndex >= 0) { event.preventDefault(); choose(results[activeIndex]); }
+    else if (event.key === 'Escape') { event.preventDefault(); close(); }
+  };
 
-  function onFocus() {
-    const value = input?.value || '';
-    if (safeSearchTerm(value).length >= MIN_QUERY_LENGTH) onInput();
-  }
+  const onOutside = event => { if (form && !form.contains(event.target)) close(); };
 
-  function onDocumentPointerDown(event) {
-    if (!form?.contains(event.target)) closePanel();
-  }
-
-  function detach() {
-    if (!attached) return;
-    input?.removeEventListener('input', onInput);
-    input?.removeEventListener('keydown', onKeyDown);
-    input?.removeEventListener('focus', onFocus);
-    document.removeEventListener('pointerdown', onDocumentPointerDown);
+  const detach = () => {
+    if (!attachedInput) return;
+    attachedInput.removeEventListener('input', onInput);
+    attachedInput.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('pointerdown', onOutside);
     panel?.remove();
-    attached = false;
-    input = null;
-    form = null;
-    panel = null;
-  }
+    attachedInput = null;
+  };
 
-  function attach() {
+  const attach = () => {
     const nextForm = document.querySelector('.hero-premium form');
     const nextInput = nextForm?.querySelector('input');
-    if (!nextForm || !nextInput) return;
-    if (attached && nextInput === input) return;
-
+    if (!nextForm || !nextInput || nextInput === attachedInput) return;
     detach();
     form = nextForm;
     input = nextInput;
     panel = document.createElement('div');
     panel.className = 'benefy-autocomplete';
-    panel.setAttribute('aria-hidden', 'true');
     form.appendChild(panel);
-
     form.classList.add('benefy-search-form--autocomplete');
-    input.setAttribute('autocomplete', 'off');
+    input.autocomplete = 'off';
     input.setAttribute('aria-autocomplete', 'list');
     input.setAttribute('aria-expanded', 'false');
-
     input.addEventListener('input', onInput);
     input.addEventListener('keydown', onKeyDown);
-    input.addEventListener('focus', onFocus);
-    document.addEventListener('pointerdown', onDocumentPointerDown);
-    attached = true;
-  }
+    document.addEventListener('pointerdown', onOutside);
+    attachedInput = input;
+  };
 
   attach();
   const observer = new MutationObserver(attach);
   observer.observe(document.body, { childList: true, subtree: true });
 
   return () => {
-    window.clearTimeout(timer);
-    requestSequence += 1;
+    clearTimeout(timer);
+    requestId += 1;
     observer.disconnect();
     detach();
   };

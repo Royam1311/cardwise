@@ -22,6 +22,7 @@ import './benefy-wallet-experience.css';
 import './benefy-footer-v3.css';
 import './benefy-homepage-refinement.css';
 import './benefy-product-card-luxury.css';
+import './benefy-autocomplete.css';
 import { enableCompactHeader } from './compactHeader';
 import { enableProfilePopover } from './profileEnhancer';
 import { enableLogoHome } from './logoHome';
@@ -34,6 +35,7 @@ import { enableNavFeatures } from './navFeatures';
 import { enableNavIndicator } from './navIndicator';
 import { enableWalletExperience } from './walletExperience';
 import { enableSiteFooter } from './siteFooter';
+import { enableAutocompleteSearch } from './autocompleteSearch';
 
 function Root() {
   useEffect(() => {
@@ -49,7 +51,8 @@ function Root() {
       enableNavFeatures(),
       enableNavIndicator(),
       enableWalletExperience(),
-      enableSiteFooter()
+      enableSiteFooter(),
+      enableAutocompleteSearch()
     ];
 
     return () => cleanups.forEach(cleanup => cleanup?.());
