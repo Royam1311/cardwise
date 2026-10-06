@@ -1,17 +1,22 @@
 import { supabase, configured } from './supabase';
 import './benefy-product-variants.css';
 
-const mounted = new WeakSet();
+const mountedSku = new WeakMap();
 const cache = new Map();
 
-function textOf(selector, root = document) {
-  return root.querySelector(selector)?.textContent?.trim() || '';
+function normalize(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\u0591-\u05c7]/g, '')
+    .replace(/[^a-z0-9\u0590-\u05ff]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function skuFromCard(card) {
   const text = card?.textContent || '';
-  const match = text.match(/(?:SKU|מק[״"]?ט)\s*:?\s*([A-Za-z0-9_-]+)/i);
-  return match?.[1] || null;
+  return text.match(/(?:SKU|מק[״"]?ט)\s*:?\s*([A-Za-z0-9_-]+)/i)?.[1] || null;
 }
 
 function colorLabel(product) {
@@ -20,43 +25,70 @@ function colorLabel(product) {
 }
 
 function colorStyle(label) {
-  const value = String(label || '').toLowerCase();
   const colors = {
     'שחור':'#111827','לבן':'#ffffff','אפור':'#9ca3af','אפור כהה':'#4b5563','כסוף':'#cbd5e1',
-    'כחול':'#2563eb','כחול נייבי':'#172554','אדום':'#dc2626','ירוק':'#16a34a','ורוד':'#f472b6',
-    'סגול':'#7c3aed','בז':'#d6c6a5','חום':'#7c2d12','כתום':'#f97316','זהב':'#d4af37',
+    'כחול':'#2563eb','כחול בהיר':'#7dd3fc','כחול נייבי':'#172554','אדום':'#dc2626','ירוק':'#16a34a',
+    'ורוד':'#f472b6','סגול':'#7c3aed','בז':'#d6c6a5','חום':'#7c2d12','כתום':'#f97316','זהב':'#d4af37',
     black:'#111827',white:'#ffffff',grey:'#9ca3af',gray:'#9ca3af',silver:'#cbd5e1',blue:'#2563eb',
-    red:'#dc2626',green:'#16a34a',pink:'#f472b6',purple:'#7c3aed',beige:'#d6c6a5',brown:'#7c2d12',orange:'#f97316'
+    navy:'#172554',red:'#dc2626',green:'#16a34a',pink:'#f472b6',purple:'#7c3aed',beige:'#d6c6a5',
+    brown:'#7c2d12',orange:'#f97316'
   };
-  return colors[value] || 'linear-gradient(135deg,#dbeafe,#93c5fd)';
+  return colors[normalize(label)] || 'linear-gradient(135deg,#dbeafe,#60a5fa)';
+}
+
+function sameProductExceptColor(a, b) {
+  if (a.merchant_id !== b.merchant_id) return false;
+  if (normalize(a.brand) !== normalize(b.brand)) return false;
+  return normalize(a.product_name) === normalize(b.product_name);
+}
+
+async function queryByMasterKey(selected) {
+  const key = selected.attributes?.master_key;
+  if (!key) return [];
+  const { data } = await supabase
+    .from('products')
+    .select('id,sku,product_name,brand,model,category,image_url,product_url,merchant_id,attributes')
+    .eq('merchant_id', selected.merchant_id)
+    .eq('active', true)
+    .contains('attributes', { master_key: key })
+    .limit(50);
+  return data || [];
+}
+
+async function queryByExactIdentity(selected) {
+  let request = supabase
+    .from('products')
+    .select('id,sku,product_name,brand,model,category,image_url,product_url,merchant_id,attributes')
+    .eq('merchant_id', selected.merchant_id)
+    .eq('active', true)
+    .eq('product_name', selected.product_name)
+    .limit(50);
+  if (selected.brand) request = request.eq('brand', selected.brand);
+  const { data } = await request;
+  return (data || []).filter(candidate => sameProductExceptColor(selected, candidate));
 }
 
 async function fetchVariants(sku) {
   if (cache.has(sku)) return cache.get(sku);
   const { data: selected, error } = await supabase
     .from('products')
-    .select('id,sku,product_name,image_url,product_url,merchant_id,attributes')
+    .select('id,sku,product_name,brand,model,category,image_url,product_url,merchant_id,attributes')
     .eq('sku', sku)
     .eq('active', true)
     .limit(1)
     .maybeSingle();
   if (error || !selected) return [];
 
-  const key = selected.attributes?.master_key;
-  if (!key) return [selected];
+  const [byKey, byIdentity] = await Promise.all([
+    queryByMasterKey(selected),
+    queryByExactIdentity(selected)
+  ]);
+  const variants = [...new Map([selected, ...byKey, ...byIdentity].map(item => [item.sku, item])).values()]
+    .filter(item => sameProductExceptColor(selected, item))
+    .sort((a, b) => colorLabel(a).localeCompare(colorLabel(b), 'he'));
 
-  const { data } = await supabase
-    .from('products')
-    .select('id,sku,product_name,image_url,product_url,merchant_id,attributes')
-    .eq('merchant_id', selected.merchant_id)
-    .eq('active', true)
-    .contains('attributes', { master_key: key })
-    .order('sku', { ascending: true });
-
-  const unique = [...new Map((data || [selected]).map(item => [item.sku, item])).values()];
-  cache.set(sku, unique);
-  for (const item of unique) cache.set(item.sku, unique);
-  return unique;
+  for (const item of variants) cache.set(item.sku, variants);
+  return variants;
 }
 
 function activateVariant(product) {
@@ -69,13 +101,9 @@ function activateVariant(product) {
   form.requestSubmit();
 }
 
-async function mount(card) {
-  if (!configured || !card || mounted.has(card)) return;
-  mounted.add(card);
-  const sku = skuFromCard(card);
-  if (!sku) return;
-  const variants = await fetchVariants(sku);
-  if (variants.length < 2 || !card.isConnected) return;
+function render(card, sku, variants) {
+  card.querySelector('.benefy-variant-picker')?.remove();
+  if (variants.length < 2) return;
 
   const section = document.createElement('section');
   section.className = 'benefy-variant-picker';
@@ -83,12 +111,14 @@ async function mount(card) {
 
   const heading = document.createElement('div');
   heading.className = 'benefy-variant-picker__heading';
-  heading.innerHTML = `<strong>צבעים זמינים</strong><span>${variants.length} אפשרויות</span>`;
-  section.appendChild(heading);
+  const title = document.createElement('strong');
+  title.textContent = 'צבעים זמינים';
+  const count = document.createElement('span');
+  count.textContent = `${variants.length} אפשרויות`;
+  heading.append(title, count);
 
   const list = document.createElement('div');
   list.className = 'benefy-variant-picker__list';
-
   for (const variant of variants) {
     const label = colorLabel(variant);
     const button = document.createElement('button');
@@ -100,7 +130,6 @@ async function mount(card) {
     const swatch = document.createElement('span');
     swatch.className = 'benefy-variant-chip__swatch';
     swatch.style.background = colorStyle(label);
-
     const info = document.createElement('span');
     info.className = 'benefy-variant-chip__info';
     const name = document.createElement('strong');
@@ -112,11 +141,19 @@ async function mount(card) {
     button.addEventListener('click', () => activateVariant(variant));
     list.appendChild(button);
   }
-
-  section.appendChild(list);
+  section.append(heading, list);
   const summary = card.querySelector('.summary');
   if (summary) card.insertBefore(section, summary);
   else card.appendChild(section);
+}
+
+async function mount(card) {
+  if (!configured || !card) return;
+  const sku = skuFromCard(card);
+  if (!sku || mountedSku.get(card) === sku) return;
+  mountedSku.set(card, sku);
+  const variants = await fetchVariants(sku);
+  if (card.isConnected && skuFromCard(card) === sku) render(card, sku, variants);
 }
 
 function scan() {
@@ -126,6 +163,6 @@ function scan() {
 export function initProductVariantSelector() {
   scan();
   const observer = new MutationObserver(scan);
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   return () => observer.disconnect();
 }
