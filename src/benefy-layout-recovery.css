@@ -1,0 +1,5 @@
+/* Last-resort size guards. These rules only prevent unbounded visual assets. */
+.site-logo,.site-logo__image{max-width:220px!important;max-height:74px!important;object-fit:contain!important}
+.hero-premium img,.hero-section img,.hero-visual img{max-width:100%;height:auto;object-fit:contain}
+.hero-premium,.hero-section{overflow:hidden}
+@media(max-width:768px){.site-logo,.site-logo__image{max-width:154px!important;max-height:54px!important}}
