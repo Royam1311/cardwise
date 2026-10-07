@@ -1,50 +1,32 @@
-function getSupabaseUrl() {
-  const value = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  if (!value) throw new Error('Missing environment variable: VITE_SUPABASE_URL');
-  return value.replace(/\/$/, '');
-}
+const MERCHANTS = ['shekem-electric', 'terminal-x', 'tzilzul'];
 
-function getServerKey() {
-  const value = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!value) throw new Error('Missing server secret: SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY');
+function env(name, fallback) {
+  const value = process.env[name] || fallback;
+  if (!value) throw new Error(`Missing environment variable: ${name}`);
   return value;
 }
 
-async function supabaseGet(path, prefer = '') {
-  const key = getServerKey();
-  const response = await fetch(`${getSupabaseUrl()}/rest/v1/${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, ...(prefer ? { Prefer: prefer } : {}) }
+async function count(filter = '') {
+  const url = env('SUPABASE_URL', process.env.VITE_SUPABASE_URL).replace(/\/$/, '');
+  const key = env('SUPABASE_SECRET_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const response = await fetch(`${url}/rest/v1/products?active=eq.true${filter}&select=id&limit=1`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: 'count=exact' }
   });
-  const text = await response.text();
-  if (!response.ok) throw new Error(`Supabase ${response.status}: ${text}`);
-  return { data: text ? JSON.parse(text) : [], contentRange: response.headers.get('content-range') };
-}
-
-function countFromContentRange(value) {
-  const match = String(value || '').match(/\/(\d+)$/);
-  return match ? Number(match[1]) : null;
-}
-
-async function countProducts(merchantId = null) {
-  const merchantFilter = merchantId ? `&merchant_id=eq.${encodeURIComponent(merchantId)}` : '';
-  const response = await supabaseGet(`products?active=eq.true${merchantFilter}&select=id&limit=1`, 'count=exact');
-  return countFromContentRange(response.contentRange) ?? response.data.length;
+  if (!response.ok) throw new Error(`Supabase ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  const match = String(response.headers.get('content-range') || '').match(/\/(\d+)$/);
+  return match ? Number(match[1]) : 0;
 }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'GET') return res.status(405).json({ success: false, error: 'Method not allowed' });
   try {
-    const [activeProducts, shekemElectric, terminalX] = await Promise.all([
-      countProducts(), countProducts('shekem-electric'), countProducts('terminal-x')
+    const [activeProducts, ...perMerchant] = await Promise.all([
+      count(),
+      ...MERCHANTS.map(m => count(`&merchant_id=eq.${encodeURIComponent(m)}`))
     ]);
-    return res.status(200).json({
-      success: true,
-      catalogReady: activeProducts > 0,
-      activeProducts,
-      merchants: { 'shekem-electric': shekemElectric, 'terminal-x': terminalX },
-      checkedAt: new Date().toISOString()
-    });
+    const merchants = Object.fromEntries(MERCHANTS.map((m, i) => [m, perMerchant[i]]));
+    return res.status(200).json({ success: true, catalogReady: activeProducts > 0, activeProducts, merchants, checkedAt: new Date().toISOString() });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }

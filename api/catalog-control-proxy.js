@@ -1,4 +1,4 @@
-const ALLOWED_ACTIONS = new Set(['status', 'shekem', 'shekemfull', 'terminalx']);
+const ALLOWED_ACTIONS = new Set(['status', 'shekem', 'shekemfull', 'terminalx', 'tzilzul']);
 
 function applyCors(req, res) {
   const origin = req.headers.origin || '*';
@@ -39,6 +39,9 @@ export default async function handler(req, res) {
     const term = encodeURIComponent(String(req.query?.term || ''));
     const maxPages = Math.max(1, Math.min(10, Number(req.query?.maxPages || 4)));
     path = `/api/sync-shekem-full?secret=${secret}&term=${term}&page=${page}&maxPages=${maxPages}`;
+  } else if (action === 'tzilzul') {
+    const maxPages = Math.max(1, Math.min(5, Number(req.query?.maxPages || 2)));
+    path = `/api/sync-tzilzul-catalog?secret=${secret}&page=${page}&maxPages=${maxPages}`;
   } else {
     const category = encodeURIComponent(String(req.query?.category || '4'));
     const maxPages = Math.max(1, Math.min(20, Number(req.query?.maxPages || 3)));
