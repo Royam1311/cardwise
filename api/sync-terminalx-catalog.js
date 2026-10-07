@@ -1,13 +1,10 @@
-// Terminal X catalog sync (batched). Each call handles one category and up to `maxPages` pages of 24.
+// Terminal X catalog sync with automatic sub-category discovery.
+// ?discover=1&category=ID  -> returns child categories from the listingSearch aggregations.
+// ?category=ID&page=N      -> syncs pages of that category (any id, not only the root list).
 const ENDPOINT = 'https://www.terminalx.com/a/listingSearch';
 const MERCHANT_ID = 'terminal-x';
 const PAGE_SIZE = 24;
-const CATEGORIES = [
-  { id: '3', name: 'נשים', path: 'women' }, { id: '4', name: 'גברים', path: 'men' },
-  { id: '5', name: 'ילדים', path: 'kids' }, { id: '392', name: 'ביוטי', path: 'beauty' },
-  { id: '23600', name: 'ספורט', path: 'sports' }, { id: '19858', name: 'בית', path: 'home' },
-  { id: '32018', name: 'תכשיטים', path: 'jewelry' }, { id: '31898', name: 'וולנס', path: 'wellness' }
-];
+const ROOTS = { '3': 'נשים', '4': 'גברים', '5': 'ילדים', '392': 'ביוטי', '23600': 'ספורט', '19858': 'בית', '32018': 'תכשיטים', '31898': 'וולנס' };
 
 function env(name, fallback) { const v = process.env[name] || fallback; if (!v) throw new Error(`Missing environment variable: ${name}`); return v; }
 const supabaseUrl = () => env('SUPABASE_URL', process.env.VITE_SUPABASE_URL).replace(/\/$/, '');
@@ -34,7 +31,8 @@ function normalize(item, category) {
   const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
   const name = String(item.name || item.image.label).trim();
   const brand = label(item, 'brand');
-  const url = `https://www.terminalx.com/${category.path}/${String(item.sku).toLowerCase()}${colorId ? `?color=${colorId}` : ''}`;
+  const path = category.path || 'catalog';
+  const url = `https://www.terminalx.com/${path}/${String(item.sku).toLowerCase()}${colorId ? `?color=${colorId}` : ''}`;
   const p = item?.price_range?.minimum_price || {};
   const price = num(p?.final_price?.value);
   const regular = num(p?.regular_price?.value);
@@ -46,8 +44,8 @@ function normalize(item, category) {
       product_name: name,
       brand,
       model: item.supplier_style || null,
-      category: category.name,
-      category_paths: [category.path],
+      category: label(item, 'div') || category.name,
+      category_paths: [path],
       image_url: item?.small_image?.url || item?.image?.url || item?.thumbnail?.url || null,
       product_url: url,
       attributes: {
@@ -100,16 +98,30 @@ async function saveBatch(items, storeId) {
   return saved.length;
 }
 
-async function fetchPage(category, page) {
+async function listing(categoryId, page, { pageSize = PAGE_SIZE, aggregations = false } = {}) {
   const r = await fetch(ENDPOINT, {
     method: 'POST',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json', Origin: 'https://www.terminalx.com', Referer: `https://www.terminalx.com/${category.path}` },
-    body: JSON.stringify({ listingSearchOptions: { myBagSkus: [] }, listingSearchQuery: { categoryId: category.id, filter: { category_id: { eq: category.id } }, pageSize: PAGE_SIZE, currentPage: page, includeAggregations: false, sort: { default: true } } })
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', Origin: 'https://www.terminalx.com', Referer: 'https://www.terminalx.com/' },
+    body: JSON.stringify({ listingSearchOptions: { myBagSkus: [] }, listingSearchQuery: { categoryId: String(categoryId), filter: { category_id: { eq: String(categoryId) } }, pageSize, currentPage: page, includeAggregations: aggregations, sort: { default: true } } })
   });
-  if (!r.ok) throw new Error(`Terminal X ${r.status}, category ${category.id}, page ${page}`);
-  const json = await r.json();
-  const root = json?.data?.elasticSearch || {};
-  return { items: Array.isArray(root.items) ? root.items : [], productCount: Number(root?.categories?.[0]?.product_count) || null, path: root?.categories?.[0]?.url_path || null };
+  if (!r.ok) throw new Error(`Terminal X ${r.status}, category ${categoryId}, page ${page}`);
+  const root = (await r.json())?.data?.elasticSearch || {};
+  return {
+    items: Array.isArray(root.items) ? root.items : [],
+    productCount: Number(root?.categories?.[0]?.product_count) || null,
+    path: root?.categories?.[0]?.url_path || null,
+    name: root?.categories?.[0]?.name || null,
+    aggregations: Array.isArray(root.aggregations) ? root.aggregations : []
+  };
+}
+
+async function discover(categoryId) {
+  const result = await listing(categoryId, 1, { pageSize: 1, aggregations: true });
+  const level = result.aggregations.find(a => a?.attribute_code === 'category_level');
+  const children = (level?.options || [])
+    .filter(o => o?.value && String(o.value) !== String(categoryId) && Number(o.count) > 0)
+    .map(o => ({ id: String(o.value), label: o.storeFrontLabel || o.label || String(o.value), count: Number(o.count) }));
+  return { category: String(categoryId), name: result.name, path: result.path, productCount: result.productCount, children };
 }
 
 export default async function handler(req, res) {
@@ -118,36 +130,40 @@ export default async function handler(req, res) {
   if (!authorized(req)) return res.status(401).json({ success: false, error: 'Unauthorized' });
   if (!enabled()) return res.status(503).json({ success: false, error: 'Terminal X synchronization is disabled' });
 
-  const requested = String(req.query?.category || '4');
-  const category = CATEGORIES.find(c => c.id === requested || c.path === requested);
-  if (!category) return res.status(400).json({ success: false, error: `Unknown category ${requested}` });
+  const categoryId = String(req.query?.category || '4').replace(/[^0-9]/g, '');
+  if (!categoryId) return res.status(400).json({ success: false, error: 'Invalid category' });
+
+  if (String(req.query?.discover || '') === '1') {
+    try { return res.status(200).json({ success: true, ...(await discover(categoryId)) }); }
+    catch (error) { return res.status(500).json({ success: false, category: categoryId, error: error.message }); }
+  }
+
   const startPage = Math.max(1, Number(req.query?.page || 1));
   const maxPages = Math.max(1, Math.min(10, Number(req.query?.maxPages || 5)));
   const delay = Math.max(300, Number(process.env.TERMINALX_REQUEST_DELAY_MS || 500));
-  let emptyPages = 0, page = startPage, pagesRequested = 0, productsReceived = 0, productsSaved = 0, productCount = null, done = false;
+  let emptyPages = 0, page = startPage, pagesRequested = 0, productsReceived = 0, productsSaved = 0, productCount = null, done = false, name = ROOTS[categoryId] || req.query?.name || categoryId;
 
   try {
     const store = await resolveStore();
     for (; page < startPage + maxPages; page += 1) {
-      const result = await fetchPage(category, page);
+      const result = await listing(categoryId, page);
       pagesRequested += 1;
       productCount = result.productCount ?? productCount;
+      name = result.name || name;
       productsReceived += result.items.length;
-      const resolved = { ...category, path: result.path || category.path };
-      productsSaved += await saveBatch(result.items.map(i => normalize(i, resolved)).filter(Boolean), store.id);
+      const category = { id: categoryId, name, path: result.path };
+      productsSaved += await saveBatch(result.items.map(i => normalize(i, category)).filter(Boolean), store.id);
       const totalPages = productCount ? Math.ceil(productCount / PAGE_SIZE) : null;
-      // Terminal X may return fewer than 24 items on a page (hidden or filtered products),
-      // so a short page is NOT the end. Stop only on an empty page or after the last page.
       if (!result.items.length) emptyPages += 1; else emptyPages = 0;
       if ((totalPages && page >= totalPages) || (!totalPages && result.items.length === 0) || emptyPages >= 3) { done = true; page += 1; break; }
       await new Promise(r => setTimeout(r, delay));
     }
     return res.status(200).json({
-      success: true, category: category.id, categoryName: category.name, startPage, pagesRequested,
+      success: true, category: categoryId, categoryName: name, startPage, pagesRequested,
       productCount, totalPages: productCount ? Math.ceil(productCount / PAGE_SIZE) : null,
       productsReceived, productsSaved, done, nextPage: done ? null : page, completedAt: new Date().toISOString()
     });
   } catch (error) {
-    return res.status(500).json({ success: false, category: category.id, error: error.message, startPage, pagesRequested, productsReceived, productsSaved, nextPage: page });
+    return res.status(500).json({ success: false, category: categoryId, error: error.message, startPage, pagesRequested, productsReceived, productsSaved, nextPage: page });
   }
 }

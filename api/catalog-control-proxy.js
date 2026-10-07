@@ -44,8 +44,10 @@ export default async function handler(req, res) {
     path = `/api/sync-tzilzul-catalog?secret=${secret}&page=${page}&maxPages=${maxPages}`;
   } else {
     const category = encodeURIComponent(String(req.query?.category || '4'));
-    const maxPages = Math.max(1, Math.min(20, Number(req.query?.maxPages || 3)));
-    path = `/api/sync-terminalx-catalog?secret=${secret}&category=${category}&page=${page}&maxPages=${maxPages}`;
+    const maxPages = Math.max(1, Math.min(10, Number(req.query?.maxPages || 5)));
+    const discover = String(req.query?.discover || '') === '1' ? '&discover=1' : '';
+    const name = req.query?.name ? `&name=${encodeURIComponent(String(req.query.name))}` : '';
+    path = `/api/sync-terminalx-catalog?secret=${secret}&category=${category}&page=${page}&maxPages=${maxPages}${discover}${name}`;
   }
 
   try {
