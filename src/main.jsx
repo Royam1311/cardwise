@@ -1,68 +1,30 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles.css';
-import './benefy-luxury.css';
-import './benefy-blue-theme.css';
-import './benefy-typography.css';
-import './benefy-header-v5.css';
-import './benefy-header-scroll-shell.css';
-import './benefy-header-glass.css';
-import './benefy-logo-home.css';
-import './benefy-search-dark.css';
-import './benefy-hero-experience.css';
-import './benefy-hero-wallet-v2.css';
-import './benefy-hero-backlights.css';
-import './benefy-hero-floating-stats.css';
-import './benefy-hero-clean-background.css';
-import './benefy-auth-showcase-v9.css';
-import './benefy-nav-features.css';
-import './benefy-nav-indicator.css';
-import './benefy-wallet-experience.css';
-import './benefy-footer-v3.css';
-import './benefy-homepage-refinement.css';
-import './benefy-product-card-luxury.css';
+import './benefy-catalog-results.css';
 import './benefy-autocomplete.css';
-import { enableCompactHeader } from './compactHeader';
-import { enableProfilePopover } from './profileEnhancer';
-import { enableLogoHome } from './logoHome';
-import { enableAuthShowcase } from './authShowcase';
-import { enableAuthControls } from './authControls';
-import { enableHeroExperience } from './heroExperience';
-import { enableHeroWalletVisual } from './heroWalletVisual';
-import { enableHeroStatsVisual } from './heroStatsVisual';
-import { enableNavFeatures } from './navFeatures';
-import { enableNavIndicator } from './navIndicator';
-import { enableWalletExperience } from './walletExperience';
-import { enableSiteFooter } from './siteFooter';
-import { enableAutocompleteSearch } from './autocompleteSearch';
-
-function Root() {
-  useEffect(() => {
-    const cleanups = [
-      enableCompactHeader(),
-      enableProfilePopover(),
-      enableLogoHome(),
-      enableAuthShowcase(),
-      enableAuthControls(),
-      enableHeroExperience(),
-      enableHeroWalletVisual(),
-      enableHeroStatsVisual(),
-      enableNavFeatures(),
-      enableNavIndicator(),
-      enableWalletExperience(),
-      enableSiteFooter(),
-      enableAutocompleteSearch()
-    ];
-
-    return () => cleanups.forEach(cleanup => cleanup?.());
-  }, []);
-
-  return <App />;
-}
+import './benefy-product-card-luxury.css';
+import './benefy-product-variants.css';
+import './benefy-catalog-infinite-scroll.css';
+import { initProductAutocomplete } from './autocompleteSearch';
+import { initProductVariantSelector } from './productVariantSelector';
+import { initCatalogInfiniteScroll } from './catalogInfiniteScroll';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
+  <React.StrictMode><App /></React.StrictMode>
 );
+
+let cleanAutocomplete;
+let cleanVariants;
+let cleanInfinite;
+function startEnhancements() {
+  cleanAutocomplete?.();
+  cleanVariants?.();
+  cleanInfinite?.();
+  cleanAutocomplete = initProductAutocomplete?.();
+  cleanVariants = initProductVariantSelector?.();
+  cleanInfinite = initCatalogInfiniteScroll?.();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startEnhancements, { once: true });
+else startEnhancements();
