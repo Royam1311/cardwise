@@ -14,13 +14,10 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ success: false, error: 'Method not allowed' });
 
   const action = String(req.query?.action || '');
-  if (!ALLOWED_ACTIONS.has(action)) {
-    return res.status(400).json({ success: false, error: 'Unsupported action' });
-  }
+  if (!ALLOWED_ACTIONS.has(action)) return res.status(400).json({ success: false, error: 'Unsupported action' });
 
   const expected = process.env.CATALOG_CONTROL_KEY;
-  const supplied = String(req.query?.key || '');
-  if (!expected || supplied !== expected) {
+  if (!expected || String(req.query?.key || '') !== expected) {
     return res.status(401).json({ success: false, error: 'Unauthorized catalog control request' });
   }
 
@@ -49,7 +46,7 @@ export default async function handler(req, res) {
     const response = await fetch(`${base}${path}`, { headers: { Accept: 'application/json' } });
     const text = await response.text();
     let payload;
-    try { payload = JSON.parse(text); } catch { payload = { raw: text }; }
+    try { payload = JSON.parse(text); } catch { payload = { success: false, raw: text.slice(0, 500) }; }
     return res.status(response.status).json(payload);
   } catch (error) {
     return res.status(502).json({ success: false, error: error.message });
