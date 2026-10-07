@@ -124,7 +124,7 @@ export default async function handler(req, res) {
   const startPage = Math.max(1, Number(req.query?.page || 1));
   const maxPages = Math.max(1, Math.min(10, Number(req.query?.maxPages || 5)));
   const delay = Math.max(300, Number(process.env.TERMINALX_REQUEST_DELAY_MS || 500));
-  let page = startPage, pagesRequested = 0, productsReceived = 0, productsSaved = 0, productCount = null, done = false;
+  let emptyPages = 0, page = startPage, pagesRequested = 0, productsReceived = 0, productsSaved = 0, productCount = null, done = false;
 
   try {
     const store = await resolveStore();
@@ -136,7 +136,10 @@ export default async function handler(req, res) {
       const resolved = { ...category, path: result.path || category.path };
       productsSaved += await saveBatch(result.items.map(i => normalize(i, resolved)).filter(Boolean), store.id);
       const totalPages = productCount ? Math.ceil(productCount / PAGE_SIZE) : null;
-      if (result.items.length < PAGE_SIZE || (totalPages && page >= totalPages)) { done = true; page += 1; break; }
+      // Terminal X may return fewer than 24 items on a page (hidden or filtered products),
+      // so a short page is NOT the end. Stop only on an empty page or after the last page.
+      if (!result.items.length) emptyPages += 1; else emptyPages = 0;
+      if ((totalPages && page >= totalPages) || (!totalPages && result.items.length === 0) || emptyPages >= 3) { done = true; page += 1; break; }
       await new Promise(r => setTimeout(r, delay));
     }
     return res.status(200).json({
