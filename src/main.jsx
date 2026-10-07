@@ -7,24 +7,50 @@ import './benefy-autocomplete.css';
 import './benefy-product-card-luxury.css';
 import './benefy-product-variants.css';
 import './benefy-catalog-infinite-scroll.css';
-import { initProductAutocomplete } from './autocompleteSearch';
-import { initProductVariantSelector } from './productVariantSelector';
+import * as AutocompleteModule from './autocompleteSearch';
+import * as VariantModule from './productVariantSelector';
 import { initCatalogInfiniteScroll } from './catalogInfiniteScroll';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode><App /></React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );
 
 let cleanAutocomplete;
 let cleanVariants;
 let cleanInfinite;
+
+function resolveInitializer(module, preferredNames) {
+  for (const name of preferredNames) {
+    if (typeof module?.[name] === 'function') return module[name];
+  }
+  if (typeof module?.default === 'function') return module.default;
+  return null;
+}
+
 function startEnhancements() {
   cleanAutocomplete?.();
   cleanVariants?.();
   cleanInfinite?.();
-  cleanAutocomplete = initProductAutocomplete?.();
-  cleanVariants = initProductVariantSelector?.();
+
+  const initAutocomplete = resolveInitializer(AutocompleteModule, [
+    'initProductAutocomplete',
+    'initAutocompleteSearch',
+    'initAutocomplete'
+  ]);
+  const initVariants = resolveInitializer(VariantModule, [
+    'initProductVariantSelector',
+    'initVariantSelector'
+  ]);
+
+  cleanAutocomplete = initAutocomplete?.();
+  cleanVariants = initVariants?.();
   cleanInfinite = initCatalogInfiniteScroll?.();
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startEnhancements, { once: true });
-else startEnhancements();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startEnhancements, { once: true });
+} else {
+  startEnhancements();
+}
