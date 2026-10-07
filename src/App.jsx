@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Search, CreditCard, LogOut, Plus, Trash2, ShieldCheck, Sparkles,
   User, Tag, Settings, Store, Package, Percent, Check, Wifi,
@@ -34,17 +34,13 @@ const readPreference = (key, fallback) => {
 };
 
 function AdaptiveLogo({ className = '' }) {
-  return (
-    <div className={`site-logo ${className}`} aria-label="BENEFY">
-      <img className="site-logo__image site-logo__image--light" src="/benefy-logo-black.png" alt="BENEFY" />
-      <img className="site-logo__image site-logo__image--dark" src="/benefy-logo-white.png" alt="" aria-hidden="true" />
-    </div>
-  );
+  return <div className={`site-logo ${className}`} aria-label="BENEFY">
+    <img className="site-logo__image site-logo__image--light" src="/benefy-logo-black.png" alt="BENEFY" />
+    <img className="site-logo__image site-logo__image--dark" src="/benefy-logo-white.png" alt="" aria-hidden="true" />
+  </div>;
 }
 
-function GoogleMark() {
-  return <span className="google-mark" aria-hidden="true"><i>G</i></span>;
-}
+function GoogleMark() { return <span className="google-mark" aria-hidden="true"><i>G</i></span>; }
 
 function Auth({ onDemo, t }) {
   const [mode, setMode] = useState('login');
@@ -55,8 +51,7 @@ function Auth({ onDemo, t }) {
   const [googleBusy, setGoogleBusy] = useState(false);
 
   async function submit(event) {
-    event.preventDefault();
-    setMsg('');
+    event.preventDefault(); setMsg('');
     if (!configured) return setMsg(t.missingConfig);
     setBusy(true);
     const { error } = mode === 'login'
@@ -70,36 +65,26 @@ function Auth({ onDemo, t }) {
     setMsg('');
     if (!configured) return setMsg(t.missingConfig);
     setGoogleBusy(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google', options: { redirectTo: window.location.origin }
-    });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
     if (error) { setMsg(error.message); setGoogleBusy(false); }
   }
 
-  return (
-    <main className="auth">
-      <section className="brand-panel">
-        <AdaptiveLogo className="site-logo--auth" />
-        <h1>{t.loginTitle}</h1><p>{t.loginText}</p>
-        <div className="feature"><ShieldCheck /> {t.privacy}</div>
-      </section>
-      <section className="auth-card">
-        <h2>{mode === 'login' ? t.signIn : t.createAccount}</h2>
-        <button type="button" className="google-login-button" onClick={google} disabled={googleBusy || busy}>
-          <GoogleMark /><span>{googleBusy ? t.googleLoading : t.google}</span>
-        </button>
-        <div className="auth-divider"><span>{t.or}</span></div>
-        <form onSubmit={submit}>
-          <label>{t.email}<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
-          <label>{t.password}<input type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} required /></label>
-          <button className="primary" disabled={busy || googleBusy}>{busy ? t.loading : mode === 'login' ? t.login : t.register}</button>
-        </form>
-        {msg && <div className="notice">{msg}</div>}
-        <button className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? t.noAccount : t.haveAccount}</button>
-        <button className="demo" onClick={onDemo}>{t.demo}</button>
-      </section>
-    </main>
-  );
+  return <main className="auth">
+    <section className="brand-panel"><AdaptiveLogo className="site-logo--auth" /><h1>{t.loginTitle}</h1><p>{t.loginText}</p><div className="feature"><ShieldCheck /> {t.privacy}</div></section>
+    <section className="auth-card">
+      <h2>{mode === 'login' ? t.signIn : t.createAccount}</h2>
+      <button type="button" className="google-login-button" onClick={google} disabled={googleBusy || busy}><GoogleMark /><span>{googleBusy ? t.googleLoading : t.google}</span></button>
+      <div className="auth-divider"><span>{t.or}</span></div>
+      <form onSubmit={submit}>
+        <label>{t.email}<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
+        <label>{t.password}<input type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} required /></label>
+        <button className="primary" disabled={busy || googleBusy}>{busy ? t.loading : mode === 'login' ? t.login : t.register}</button>
+      </form>
+      {msg && <div className="notice">{msg}</div>}
+      <button className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? t.noAccount : t.haveAccount}</button>
+      <button className="demo" onClick={onDemo}>{t.demo}</button>
+    </section>
+  </main>;
 }
 
 function WalletCard({ code, name, selected, onToggle, t }) {
@@ -113,14 +98,10 @@ function WalletCard({ code, name, selected, onToggle, t }) {
 
 function ProductVisual({ image, name, t, compact = false }) {
   const [failed, setFailed] = useState(false);
-
   useEffect(() => setFailed(false), [image]);
-
   return !image || failed
     ? <div className={`product-visual product-visual--empty ${compact ? 'product-visual--compact' : ''}`}><ImageOff /><span>{t.imagePending}</span></div>
-    : <div className={`product-visual ${compact ? 'product-visual--compact' : ''}`}>
-        <img src={image} alt={name} referrerPolicy="no-referrer" loading="lazy" onError={() => setFailed(true)} />
-      </div>;
+    : <div className={`product-visual ${compact ? 'product-visual--compact' : ''}`}><img src={image} alt={name} referrerPolicy="no-referrer" loading="lazy" onError={() => setFailed(true)} /></div>;
 }
 
 function Admin({ t }) {
@@ -133,8 +114,7 @@ function Admin({ t }) {
       supabase.from('stores').select('*', { count: 'exact', head: true }),
       supabase.from('benefit_rules').select('*', { count: 'exact', head: true })
     ]);
-    setCounts({ products: p.count || 0, stores: s.count || 0, benefits: b.count || 0 });
-    setBusy(false);
+    setCounts({ products: p.count || 0, stores: s.count || 0, benefits: b.count || 0 }); setBusy(false);
   }
   useEffect(() => { load(); }, []);
   const items = [[Package, t.products, counts.products], [Store, t.stores, counts.stores], [Percent, t.benefits, counts.benefits]];
@@ -149,43 +129,47 @@ export default function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [language, setLanguage] = useState(() => readPreference('benefy-language', 'he'));
   const [theme, setTheme] = useState(() => readPreference('benefy-theme', 'light'));
+  const restoringHistory = useRef(false);
   const t = translations[language] || translations.he;
 
   const copy = useMemo(() => language === 'he' ? {
-    results: 'מוצרים שנמצאו',
-    choose: 'בחרו מוצר כדי להשוות מחירים והטבות',
-    select: 'הצג מחיר',
-    back: 'חזרה לכל התוצאות',
-    source: 'המידע והמחיר מגיעים מהמקור',
-    exactSku: 'התאמה מדויקת למק״ט'
+    results: 'מוצרים שנמצאו', choose: 'בחרו מוצר כדי להשוות מחירים והטבות', select: 'הצג מחיר', back: 'חזרה לכל התוצאות', source: 'המידע והמחיר מגיעים מהמקור', exactSku: 'התאמה מדויקת למק״ט'
   } : {
-    results: 'Products found',
-    choose: 'Choose a product to compare prices and benefits',
-    select: 'View price',
-    back: 'Back to all results',
-    source: 'Product data and price come from the source',
-    exactSku: 'Exact SKU match'
+    results: 'Products found', choose: 'Choose a product to compare prices and benefits', select: 'View price', back: 'Back to all results', source: 'Product data and price come from the source', exactSku: 'Exact SKU match'
   }, [language]);
 
-  useEffect(() => {
-    function resetSearch() {
-      setTab('search');
-      setQuery('');
-      setSearchError('');
-      setProduct(null);
-      setOffers([]);
-      setSearchResults([]);
-      setHasSearched(false);
-      setSearching(false);
-    }
-    window.addEventListener('benefy:reset-search', resetSearch);
-    return () => window.removeEventListener('benefy:reset-search', resetSearch);
-  }, []);
+  function historySnapshot(overrides = {}) {
+    return { benefy: true, tab, query, hasSearched, searchResults, product, offers, searchError, ...overrides };
+  }
+  function pushHistory(overrides = {}) {
+    if (!restoringHistory.current) window.history.pushState(historySnapshot(overrides), '', window.location.href);
+  }
+  function restoreHistory(state) {
+    if (!state?.benefy) return;
+    restoringHistory.current = true;
+    setTab(state.tab || 'search'); setQuery(state.query || ''); setHasSearched(Boolean(state.hasSearched));
+    setSearchResults(state.searchResults || []); setProduct(state.product || null); setOffers(state.offers || []);
+    setSearchError(state.searchError || ''); setSearching(false);
+    requestAnimationFrame(() => { restoringHistory.current = false; });
+  }
+  function changeTab(nextTab) {
+    if (nextTab === tab) return;
+    pushHistory({ tab: nextTab }); setTab(nextTab);
+  }
+  function clearSearch({ addHistory = true } = {}) {
+    const next = { tab: 'search', query: '', hasSearched: false, searchResults: [], product: null, offers: [], searchError: '' };
+    if (addHistory) pushHistory(next);
+    setTab('search'); setQuery(''); setHasSearched(false); setSearchResults([]); setProduct(null); setOffers([]); setSearchError(''); setSearching(false);
+  }
 
   useEffect(() => {
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
-    document.documentElement.dataset.theme = theme;
+    function resetSearch() { clearSearch(); }
+    window.addEventListener('benefy:reset-search', resetSearch);
+    return () => window.removeEventListener('benefy:reset-search', resetSearch);
+  }, [tab, query, hasSearched, searchResults, product, offers, searchError]);
+
+  useEffect(() => {
+    document.documentElement.lang = language; document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr'; document.documentElement.dataset.theme = theme;
     try { localStorage.setItem('benefy-language', language); localStorage.setItem('benefy-theme', theme); } catch {}
   }, [language, theme]);
 
@@ -201,70 +185,51 @@ export default function App() {
     else if (demo) setCards(['visa', 'tav', 'htz']);
   }, [session, demo]);
 
+  useEffect(() => {
+    if (loading || (!session && !demo)) return;
+    if (!window.history.state?.benefy) window.history.replaceState(historySnapshot(), '', window.location.href);
+    const onPopState = event => {
+      if (event.state?.benefy) restoreHistory(event.state);
+      else clearSearch({ addHistory: false });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [loading, session, demo]);
+
   async function loadUser() {
     const [{ data: c }, { data: p }] = await Promise.all([
       supabase.from('cards').select('card_code,card_type').eq('active', true).order('created_at'),
       supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
     ]);
-    setCards((c || []).map(x => x.card_code || x.card_type).filter(Boolean));
-    setIsAdmin(p?.role === 'admin');
+    setCards((c || []).map(x => x.card_code || x.card_type).filter(Boolean)); setIsAdmin(p?.role === 'admin');
   }
-
   async function loadCatalog() {
     const { data } = await supabase.from('card_programs').select('code,display_name').eq('active', true).order('display_name');
     if (data?.length) setCardCatalog(data.map(x => [x.code, x.display_name]));
   }
-
   async function toggleCard(code) {
     if (demo) return setCards(a => a.includes(code) ? a.filter(x => x !== code) : [...a, code]);
     if (cards.includes(code)) await supabase.from('cards').delete().eq('user_id', session.user.id).eq('card_code', code);
-    else {
-      const p = cardCatalog.find(x => x[0] === code);
-      await supabase.from('cards').insert({ user_id: session.user.id, card_code: code, card_type: code, card_name: p?.[1] || code, active: true });
-    }
+    else { const p = cardCatalog.find(x => x[0] === code); await supabase.from('cards').insert({ user_id: session.user.id, card_code: code, card_type: code, card_name: p?.[1] || code, active: true }); }
     loadUser();
   }
-
   async function inspect(url) {
     if (!url) return null;
-    try {
-      const response = await fetch(`/api/inspect-product?url=${encodeURIComponent(url)}`);
-      if (!response.ok) return null;
-      return (await response.json())?.product?.image || null;
-    } catch { return null; }
+    try { const response = await fetch(`/api/inspect-product?url=${encodeURIComponent(url)}`); return response.ok ? (await response.json())?.product?.image || null : null; }
+    catch { return null; }
   }
 
-  async function loadProductOffers(foundProduct) {
-    setSearching(true);
-    setSearchError('');
-    setProduct(null);
-    setOffers([]);
-
-    const { data: prices, error: priceError } = await supabase
-      .from('prices')
-      .select('id,store_id,price,shipping,updated_at,product_url')
-      .eq('product_id', foundProduct.id)
-      .eq('active', true);
-
-    if (priceError) {
-      setSearching(false);
-      return setSearchError(priceError.message);
-    }
-
+  async function loadProductOffers(foundProduct, { addToHistory = true } = {}) {
+    setSearching(true); setSearchError(''); setProduct(null); setOffers([]);
+    const { data: prices, error: priceError } = await supabase.from('prices').select('id,store_id,price,shipping,updated_at,product_url').eq('product_id', foundProduct.id).eq('active', true);
+    if (priceError) { setSearching(false); return setSearchError(priceError.message); }
     const ids = [...new Set((prices || []).map(x => x.store_id).filter(Boolean))];
-    const storeResponse = ids.length
-      ? await supabase.from('stores').select('id,store_name,website').in('id', ids)
-      : { data: [] };
-
+    const storeResponse = ids.length ? await supabase.from('stores').select('id,store_name,website').in('id', ids) : { data: [] };
     let benefitRules = [];
-    if (ids.length && cards.length) {
-      const { data } = await supabase.from('benefit_rules').select('*').in('program_code', cards).in('store_id', ids).eq('active', true);
-      benefitRules = data || [];
-    }
-
+    if (ids.length && cards.length) { const { data } = await supabase.from('benefit_rules').select('*').in('program_code', cards).in('store_id', ids).eq('active', true); benefitRules = data || []; }
     const image = foundProduct.image_url || await inspect(prices?.[0]?.product_url);
-    setProduct({ ...foundProduct, image_url: image });
-
+    const selectedProduct = { ...foundProduct, image_url: image };
+    setProduct(selectedProduct);
     const now = Date.now();
     const isActive = rule => (!rule.start_date || new Date(rule.start_date) <= now) && (!rule.end_date || new Date(rule.end_date) >= now);
     const calculate = (price, rule) => {
@@ -272,126 +237,58 @@ export default function App() {
       if (!value || price < Number(rule.min_purchase || 0)) return null;
       if (rule.benefit_type === 'special_price') return { saving: Math.max(0, price - value), checkout: value, effective: value };
       let saving = rule.discount_unit === 'percent' ? price * value / 100 : value;
-      const cap = Number(rule.max_discount_cap || 0);
-      if (cap > 0) saving = Math.min(saving, cap);
-      saving = Math.max(0, Math.min(saving, price));
+      const cap = Number(rule.max_discount_cap || 0); if (cap > 0) saving = Math.min(saving, cap); saving = Math.max(0, Math.min(saving, price));
       const deferred = ['cashback', 'loaded_card', 'voucher'].includes(rule.benefit_type);
       return { saving, checkout: deferred ? price : price - saving, effective: price - saving };
     };
-
     const combined = (prices || []).map(row => {
       const store = (storeResponse.data || []).find(x => x.id === row.store_id);
       const price = Number(row.price || 0), shipping = Number(row.shipping || 0);
-      const best = benefitRules
-        .filter(r => r.store_id === row.store_id && isActive(r))
-        .map(rule => ({ rule, result: calculate(price, rule) }))
-        .filter(x => x.result)
-        .sort((a, b) => a.result.effective - b.result.effective)[0];
+      const best = benefitRules.filter(r => r.store_id === row.store_id && isActive(r)).map(rule => ({ rule, result: calculate(price, rule) })).filter(x => x.result).sort((a, b) => a.result.effective - b.result.effective)[0];
       const effective = best?.result.effective ?? price;
       const programName = best ? (cardCatalog.find(x => x[0] === best.rule.program_code)?.[1] || best.rule.program_code) : null;
-      return {
-        id: row.id,
-        store: store?.store_name || t.stores,
-        website: row.product_url || store?.website || null,
-        price,
-        shipping,
-        effective,
-        checkout: best?.result.checkout ?? price,
-        total: effective + shipping,
-        saving: best?.result.saving || 0,
-        benefit: best?.rule || null,
-        updatedAt: row.updated_at,
-        note: best ? `${programName}: ${best.rule.title || t.activeBenefit}` : t.basePrice
-      };
+      return { id: row.id, store: store?.store_name || t.stores, website: row.product_url || store?.website || null, price, shipping, effective, checkout: best?.result.checkout ?? price, total: effective + shipping, saving: best?.result.saving || 0, benefit: best?.rule || null, updatedAt: row.updated_at, note: best ? `${programName}: ${best.rule.title || t.activeBenefit}` : t.basePrice };
     }).sort((a, b) => a.total - b.total);
-
-    setOffers(combined);
-    if (!combined.length) setSearchError(t.noPrices);
-    setSearching(false);
-    window.setTimeout(() => document.querySelector('.results-premium')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    const nextError = combined.length ? '' : t.noPrices;
+    setOffers(combined); setSearchError(nextError); setSearching(false);
+    if (addToHistory) pushHistory({ tab: 'search', query, hasSearched: true, searchResults, product: selectedProduct, offers: combined, searchError: nextError });
+    setTimeout(() => document.querySelector('.results-premium')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
 
   async function searchProducts(event) {
     event?.preventDefault();
-    const term = query.trim();
-    setHasSearched(true);
-    setSearchError('');
-    setProduct(null);
-    setOffers([]);
-    setSearchResults([]);
-
+    const term = query.trim(); setHasSearched(true); setSearchError(''); setProduct(null); setOffers([]); setSearchResults([]);
     if (!term) return setSearchError(t.emptySearch);
     if (!configured || demo) return setSearchError(t.liveOnly);
-
     setSearching(true);
     const safeTerm = term.replace(/[,%()]/g, ' ').trim();
-    const { data: found, error: productError } = await supabase
-      .from('products')
-      .select('id,product_name,sku,category,image_url')
-      .eq('active', true)
-      .or(`product_name.ilike.%${safeTerm}%,sku.ilike.%${safeTerm}%,category.ilike.%${safeTerm}%`)
-      .limit(48);
-
-    if (productError || !found?.length) {
-      setSearching(false);
-      return setSearchError(productError?.message || t.notFound);
-    }
-
+    const { data: found, error: productError } = await supabase.from('products').select('id,product_name,sku,category,image_url').eq('active', true).or(`product_name.ilike.%${safeTerm}%,sku.ilike.%${safeTerm}%,category.ilike.%${safeTerm}%`).limit(48);
+    if (productError || !found?.length) { setSearching(false); return setSearchError(productError?.message || t.notFound); }
     const ranked = [...found].sort((a, b) => {
       const aExact = String(a.sku || '').toLowerCase() === safeTerm.toLowerCase() ? 1 : 0;
       const bExact = String(b.sku || '').toLowerCase() === safeTerm.toLowerCase() ? 1 : 0;
-      if (aExact !== bExact) return bExact - aExact;
-      return String(a.product_name || '').localeCompare(String(b.product_name || ''), language === 'he' ? 'he' : 'en');
+      return aExact !== bExact ? bExact - aExact : String(a.product_name || '').localeCompare(String(b.product_name || ''), language === 'he' ? 'he' : 'en');
     });
-
-    setSearchResults(ranked);
-    setSearching(false);
-
-    if (ranked.length === 1 || String(ranked[0]?.sku || '').toLowerCase() === safeTerm.toLowerCase()) {
-      await loadProductOffers(ranked[0]);
-    }
+    setSearchResults(ranked); setSearching(false);
+    const exactProduct = ranked.length === 1 || String(ranked[0]?.sku || '').toLowerCase() === safeTerm.toLowerCase();
+    if (exactProduct) { await loadProductOffers(ranked[0], { addToHistory: true }); return; }
+    pushHistory({ tab: 'search', query: term, hasSearched: true, searchResults: ranked, product: null, offers: [], searchError: '' });
   }
 
   if (loading) return <div className="center">{t.loading}</div>;
   if (!session && !demo) return <Auth onDemo={() => setDemo(true)} t={t} />;
-
   const email = session?.user?.email || t.demoUser;
   const tabs = [[Search, 'search', t.search], [CreditCard, 'cards', t.wallet], ...(isAdmin ? [[Settings, 'admin', t.admin]] : [])];
 
   return <div dir={language === 'he' ? 'rtl' : 'ltr'}>
-    <header className="topbar"><AdaptiveLogo /><nav className="nav-3d">{tabs.map(([Icon, key, label]) => <button key={key} className={tab === key ? 'active' : ''} onClick={() => setTab(key)}><span className="nav-icon"><Icon /></span><span>{label}</span></button>)}</nav><div className="header-actions"><button className="header-control" onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}><Languages /><span>{t.languageButton}</span></button><button className="header-control theme-control" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon /> : <Sun />}</button><div className="user"><User />{email}<button onClick={() => session ? supabase.auth.signOut() : setDemo(false)}><LogOut /></button></div></div></header>
-
+    <header className="topbar"><AdaptiveLogo /><nav className="nav-3d">{tabs.map(([Icon, key, label]) => <button key={key} className={tab === key ? 'active' : ''} onClick={() => changeTab(key)}><span className="nav-icon"><Icon /></span><span>{label}</span></button>)}</nav><div className="header-actions"><button className="header-control" onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}><Languages /><span>{t.languageButton}</span></button><button className="header-control theme-control" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon /> : <Sun />}</button><div className="user"><User />{email}<button onClick={() => session ? supabase.auth.signOut() : setDemo(false)}><LogOut /></button></div></div></header>
     {tab === 'admin' ? <Admin t={t} /> : tab === 'cards' ? <section className="page"><div className="wallet-heading"><div><h1>{t.wallet}</h1><p>{t.walletText}</p></div><div className="wallet-counter"><CreditCard /><strong>{cards.length}</strong> {t.activePrograms}</div></div><div className="wallet-grid">{cardCatalog.map(([code, name]) => <WalletCard key={code} code={code} name={name} selected={cards.includes(code)} onToggle={() => toggleCard(code)} t={t} />)}</div></section> : <>
       <section className="hero-premium"><span><Sparkles />{t.heroBadge}</span><h1>{t.heroLine1}<br />{t.heroLine2}</h1><form onSubmit={searchProducts}><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.placeholder} /><button className="primary search-3d" disabled={searching}>{searching ? t.searching : t.compare}</button></form></section>
-
       <section className={`page results-premium ${searchResults.length > 1 && !product ? 'results-premium--catalog' : ''}`}>
         {searchError && <div className="warning full-row">{searchError}</div>}
         {!hasSearched && <div className="welcome-card full-row"><Sparkles /><div><strong>{t.startTitle}</strong><span>{t.startText}</span></div></div>}
-
-        {searchResults.length > 1 && !product && <div className="catalog-results full-row">
-          <div className="catalog-results__header">
-            <div><h2>{copy.results} <span>{searchResults.length}</span></h2><p>{copy.choose}</p></div>
-            <button type="button" className="catalog-results__clear" onClick={() => { setQuery(''); setSearchResults([]); setHasSearched(false); }}><X /></button>
-          </div>
-          <div className="catalog-grid">
-            {searchResults.map(item => <article className="catalog-card" key={item.id}>
-              <ProductVisual image={item.image_url} name={item.product_name} t={t} compact />
-              <div className="catalog-card__body">
-                <span className="category">{item.category || t.noCategory}</span>
-                <h3>{item.product_name}</h3>
-                <p>{t.sku}: <b>{item.sku || '-'}</b></p>
-                <small><ShieldCheck />{copy.source}</small>
-              </div>
-              <button type="button" className="catalog-card__button" onClick={() => loadProductOffers(item)}>{copy.select}<ChevronLeft /></button>
-            </article>)}
-          </div>
-        </div>}
-
-        {product && <>
-          {searchResults.length > 1 && <button type="button" className="catalog-back full-row" onClick={() => { setProduct(null); setOffers([]); setSearchError(''); }}><ChevronLeft />{copy.back}</button>}
-          <aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t} /><span className="category">{product.category || t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku || '-'}</p><div className="summary"><Tag />{t.activeCards}: {cards.length}</div></aside>
-          <main><h2>{t.foundPrices}</h2>{offers.map((offer, index) => <article className={`offer-card ${index === 0 ? 'best' : ''}`} key={offer.id}>{index === 0 && <b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{offer.store.slice(0, 1)}</div><div><h3>{offer.store}</h3><small><ShieldCheck />{t.source}</small></div></div><div className="price-block">{offer.saving > 0 && <del>{money(offer.price, language)}</del>}<strong>{money(offer.effective, language)}</strong><span>{offer.note}</span>{offer.saving > 0 && <p className="saving-line">{t.saving}: <b>{money(offer.saving, language)}</b>{offer.checkout !== offer.effective ? ` | ${t.checkout}: ${money(offer.checkout, language)}` : ''}</p>}{offer.benefit?.notes?.includes('TEST') && <p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {offer.shipping ? money(offer.shipping, language) : t.free} | {t.total}: <b>{money(offer.total, language)}</b></p></div>{offer.website ? <button className="store-button" onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>{t.storeButton}<ExternalLink /></button> : <button disabled>{t.noLink}</button>}</article>)}</main>
-        </>}
+        {searchResults.length > 1 && !product && <div className="catalog-results full-row"><div className="catalog-results__header"><div><h2>{copy.results} <span>{searchResults.length}</span></h2><p>{copy.choose}</p></div><button type="button" className="catalog-results__clear" onClick={() => clearSearch()}><X /></button></div><div className="catalog-grid">{searchResults.map(item => <article className="catalog-card" key={item.id}><ProductVisual image={item.image_url} name={item.product_name} t={t} compact /><div className="catalog-card__body"><span className="category">{item.category || t.noCategory}</span><h3>{item.product_name}</h3><p>{t.sku}: <b>{item.sku || '-'}</b></p><small><ShieldCheck />{copy.source}</small></div><button type="button" className="catalog-card__button" onClick={() => loadProductOffers(item)}>{copy.select}<ChevronLeft /></button></article>)}</div></div>}
+        {product && <>{searchResults.length > 1 && <button type="button" className="catalog-back full-row" onClick={() => window.history.back()}><ChevronLeft />{copy.back}</button>}<aside className="product-card"><ProductVisual image={product.image_url} name={product.product_name} t={t} /><span className="category">{product.category || t.noCategory}</span><h2>{product.product_name}</h2><p>{t.sku}: {product.sku || '-'}</p><div className="summary"><Tag />{t.activeCards}: {cards.length}</div></aside><main><h2>{t.foundPrices}</h2>{offers.map((offer, index) => <article className={`offer-card ${index === 0 ? 'best' : ''}`} key={offer.id}>{index === 0 && <b className="best-label">{t.best}</b>}<div className="store-block"><div className="store-orb">{offer.store.slice(0, 1)}</div><div><h3>{offer.store}</h3><small><ShieldCheck />{t.source}</small></div></div><div className="price-block">{offer.saving > 0 && <del>{money(offer.price, language)}</del>}<strong>{money(offer.effective, language)}</strong><span>{offer.note}</span>{offer.saving > 0 && <p className="saving-line">{t.saving}: <b>{money(offer.saving, language)}</b>{offer.checkout !== offer.effective ? ` | ${t.checkout}: ${money(offer.checkout, language)}` : ''}</p>}{offer.benefit?.notes?.includes('TEST') && <p className="test-label">{t.testBenefit}</p>}<p>{t.shipping}: {offer.shipping ? money(offer.shipping, language) : t.free} | {t.total}: <b>{money(offer.total, language)}</b></p></div>{offer.website ? <button className="store-button" onClick={() => window.open(offer.website, '_blank', 'noopener,noreferrer')}>{t.storeButton}<ExternalLink /></button> : <button disabled>{t.noLink}</button>}</article>)}</main></>}
       </section>
     </>}
   </div>;
